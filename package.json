@@ -1,0 +1,19 @@
+{
+	"name": "locker",
+	"version": "0.1.1",
+	"description": "encrypted notepad",
+	"license": "GPL3",
+	"engines": {
+		"node": "^12.16.3",
+		"npm": "^6.14.6"
+	},
+	"scripts": {
+		"build": "electron-rebuild",
+		"electron": "electron electron.js"
+	},
+	"dependencies": {
+		"database-js": "^3.0.10",
+		"database-js-postgres": "^1.1.2",
+		"electron": "^10.1.3"
+	}
+}

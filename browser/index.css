@@ -1,0 +1,57 @@
+main.incorrect_password > a {
+	display: block;
+}
+
+main.login > form > label {
+	display: block;
+	margin: 0.5ex 0;
+}
+
+main.main > div.tag {
+	display: flex;
+}
+
+main.main > div.tag > a.inactive {
+	border: black thin solid;
+	border-radius: 1ex 1ex 0 0;
+	padding: 1ex 2ex;
+	background-color: lightgray;
+}
+
+main.main > div.tag > a.active {
+	border: black thin solid;
+	border-bottom: none;
+	border-radius: 1ex 1ex 0 0;
+	padding: 1ex 2ex;
+	background-color: white;
+}
+
+main.main > div.tag > span {
+	flex-grow: 1;
+	border-bottom: black thin solid;
+}
+
+main.main > div.tab {
+	border: black thin solid;
+	border-top: none;
+	padding: 2ex;
+}
+
+section.key > form > label {
+	display: block;
+}
+
+section.data > form > div > label > textarea {
+	display: block;
+}
+
+section.data-wrong-key > span {
+	padding: 0.5ex;
+	border: gray thin solid;
+	background-color: lightgray;
+}
+
+a.link {
+	color: blue;
+	text-decoration: underline;
+}
