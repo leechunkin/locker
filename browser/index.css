@@ -2,6 +2,10 @@ main.incorrect_password > a {
 	display: block;
 }
 
+main.login {
+	text-align: center;
+}
+
 main.login > form > label {
 	display: block;
 	margin: 0.5ex 0;

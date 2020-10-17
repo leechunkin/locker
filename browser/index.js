@@ -5,8 +5,7 @@ MODULE.define(
 	function (API,  {T, E}) {
 
 function State() {
-	this.reset();
-	return this;
+	return this.reset();
 }
 Object.assign(
 	State.prototype,
@@ -20,6 +19,8 @@ Object.assign(
 				file: null,
 				crypto: null
 			};
+			this.changing = false;
+			return this;
 		}
 	}
 );
@@ -139,7 +140,7 @@ function logout_section(main) {
 }
 
 function key_section() {
-	const text_input = E('input', {'type': 'text', 'value': state.key.text});
+	const text_input = E('input', {'type': 'text', 'value': state.key.text, 'event$': {'change': text_change}});
 	const file_input = E('input', {'type': 'file', 'event$': {'change': file_change}});
 	const section =
 		E('section' , {'class': 'key'},
@@ -147,12 +148,15 @@ function key_section() {
 				E('label', null, 'Key text ', text_input),
 				E('label', null, 'Key file ', file_input),
 				E('button', {'type': 'submit'}, 'Use')));
+	function text_change(event) {
+		state.changing = true;
+	}
 	function file_change(event) {
-		event.preventDefault();
 		if (file_input.files.length < 1) {
 			state.key.file = null;
 			return;
 		}
+		state.changing = true;
 		const reader = new FileReader;
 		reader.addEventListener(
 			'load',
@@ -174,6 +178,7 @@ function key_section() {
 		const hash = await crypto.subtle.digest('SHA-256', clear);
 		const usages = ['encrypt', 'decrypt'];
 		state.key.crypto = await crypto.subtle.importKey('raw', new Uint8Array(hash), {name: 'AES-GCM'}, true, usages);
+		state.changing = false;
 	}
 	async function form_submit(event) {
 		event.preventDefault();
@@ -273,8 +278,8 @@ function data_section(main, origin) {
 	if (state.key.crypto === null)
 		return E('section', {'class': 'data-empty-key'}, 'Encryption key is not set properly.');
 	const section = E('section', {'class': 'data'}, 'Loading...');
-	const name_input = E('input', {'type': 'text'});
-	const content_input = E('textarea', null);
+	const name_input = E('input', {'type': 'text', 'event$': {'change': name_change}});
+	const content_input = E('textarea', {'event$': {'change': content_change}});
 	function make_origin_field() {
 		origin_input =
 			E('input', {'type': 'text', 'disabled': '', 'value': origin});
@@ -319,6 +324,12 @@ function data_section(main, origin) {
 			section.firstChild
 		);
 	}
+	function name_change(event) {
+		state.changing = true;
+	}
+	function content_change(event) {
+		state.changing = true;
+	}
 	async function submit(event) {
 		event.preventDefault();
 		const name = name_input.value;
@@ -343,6 +354,7 @@ function data_section(main, origin) {
 			if (!await API.change(state.username, state.password, state.directory, origin, name, nonce, cipher_text))
 				return alert('Fail to change data');
 		}
+		state.changing = false;
 	}
 	async function new_click(event) {
 		event.preventDefault();
@@ -371,6 +383,10 @@ function main_page() {
 				logout_tag, key_tag, list_tag, data_tag, E('span')),
 			container);
 	function activate(tag, tab) {
+		if (state.changing)
+			if (!confirm('Discard unsaved changes ?'))
+				return;
+		state.changing = false;
 		if (active !== null) {
 			active.tag.setAttribute('class', 'inactive');
 			container.removeChild(active.tab);
