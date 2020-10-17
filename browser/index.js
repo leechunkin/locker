@@ -1,8 +1,8 @@
 'use strict';
 MODULE.define(
 	null,
-	[        'API', 'DOM', 'document'],
-	function (API,  {T, E}) {
+	[        'API', 'DOM global', 'document'],
+	function (API,  {T, E},        document) {
 
 function State() {
 	return this.reset();

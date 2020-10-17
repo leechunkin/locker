@@ -29,10 +29,6 @@ const handle = {
 	}
 };
 
-async function login() {
-	return true;
-}
-
 IPC.handle('API', async function (event, request) {
 	if (!await operation.authorize(request.username, request.password))
 		return null;
