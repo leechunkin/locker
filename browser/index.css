@@ -13,6 +13,7 @@ main.login > form > label {
 
 main.main > div.tag {
 	display: flex;
+	cursor: pointer;
 }
 
 main.main > div.tag > a.inactive {
@@ -43,6 +44,11 @@ main.main > div.tab {
 
 section.key > form > label {
 	display: block;
+	margin: 0.5ex 0;
+}
+
+section.data > form > div {
+	margin: 1ex 0;
 }
 
 section.data > form > div > label > textarea {
@@ -55,7 +61,34 @@ section.data-wrong-key > span {
 	background-color: lightgray;
 }
 
+section.generation > form {
+	height: calc(100vh - 14ex);
+}
+
+section.generation > form > div {
+	margin: 2ex 0;
+}
+
+section.generation > form > div > label > output {
+	padding: 1ex;
+	font-family: monospace;
+}
+
+section.generation > form > div > label > output.progress {
+	background-color: white;
+	color: lightgray;
+}
+
+section.generation > form > div > label > output.ready {
+	background-color: lightyellow;
+	color: darkblue;
+}
+
 a.link {
 	color: blue;
 	text-decoration: underline;
+}
+
+button {
+	cursor: pointer;
 }

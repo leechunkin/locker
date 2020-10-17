@@ -145,9 +145,9 @@ function key_section() {
 	const section =
 		E('section' , {'class': 'key'},
 			E('form' , {'event$': {'submit': form_submit}},
-				E('label', null, 'Key text ', text_input),
-				E('label', null, 'Key file ', file_input),
-				E('button', {'type': 'submit'}, 'Use')));
+				E('div', null, E('label', null, 'Key text ', text_input)),
+				E('div', null, E('label', null, 'Key file ', file_input)),
+				E('div', null, E('button', {'type': 'submit'}, 'Use'))));
 	function text_change(event) {
 		state.changing = true;
 	}
@@ -284,7 +284,8 @@ function data_section(main, origin) {
 		origin_input =
 			E('input', {'type': 'text', 'disabled': '', 'value': origin});
 		origin_field =
-			E('div', null, 'Origin title ',
+			E('div', null,
+				'Origin title ',
 				origin_input,
 				E('button', {'type': 'button', 'event$': {'click': new_click}}, 'Create new file'));
 	}
@@ -324,6 +325,16 @@ function data_section(main, origin) {
 			section.firstChild
 		);
 	}
+	async function new_click(event) {
+		event.preventDefault();
+		const new_field = E('div', null, 'New file from: ', T(origin));
+		const parent = origin_field.parentNode;
+		parent.insertBefore(new_field, origin_field);
+		parent.removeChild(origin_field);
+		origin = null;
+		origin_input = null;
+		origin_field = new_field;
+	}
 	function name_change(event) {
 		state.changing = true;
 	}
@@ -356,17 +367,51 @@ function data_section(main, origin) {
 		}
 		state.changing = false;
 	}
-	async function new_click(event) {
-		event.preventDefault();
-		const new_field = E('div', null, 'New file from: ', T(origin));
-		const parent = origin_field.parentNode;
-		parent.insertBefore(new_field, origin_field);
-		parent.removeChild(origin_field);
-		origin = null;
-		origin_input = null;
-		origin_field = new_field;
-	}
 	load_origin();
+	return section;
+}
+
+function generation_section() {
+	var limit = 56;
+	var key = ''
+	var last_x, last_y;
+	const characters = "ZN23456789ABCDEFGHJKLMPQRSTUVWXY";
+	const output = E('output', null);
+	const section =
+		E('section', {'class': 'generation'},
+			E('form', {'event$': {'click': form_click}},
+				E('p', null, 'Randomly click somewhere on the page to generate random string for password.'),
+				E('div', null,
+					E('label', null, 'Strength: ',
+						E('select', {'event$': {'change': strength_change}},
+							[16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104]
+								.map(
+									function (n) {
+										const c = n.toString();
+										const b = (n * 5).toString();
+										const a = {'value': c};
+										if (n === limit) a['selected'] = '';
+										return E("option", a, c + " characters, " + b + " bits");
+									}
+								)))),
+				E('div', null, E('label', null, 'Generated password: ', output))));
+	function update_output(value) {
+		key = value.slice(0, limit);
+		output.value = key;
+		output.className = key.length >= limit ? 'ready' : 'progress';
+	}
+	function form_click(event) {
+		if (last_x == event.clientX && last_y == event.clientY) return;
+		last_x = event.clientX;
+		last_y = event.clientY;
+		const x = Math.abs(last_x + Math.floor(Math.random() * 32));
+		const y = Math.abs(last_y + Math.floor(Math.random() * 32));
+		return update_output(characters[x % 32].toString() + characters[y % 32].toString() + key);
+	}
+	function strength_change(event) {
+		limit = Number.parseInt(this.value);
+		return update_output(key);
+	}
 	return section;
 }
 
@@ -377,10 +422,11 @@ function main_page() {
 	const key_tag = E('a', {'class': 'inactive', 'event$': {'click': key_click}}, 'Key');
 	const list_tag = E('a', {'class': 'inactive', 'event$': {'click': list_click}}, 'List');
 	const data_tag = E('a', {'class': 'inactive', 'event$': {'click': data_click}}, 'File');
+	const generation_tag = E('a', {'class': 'inactive', 'event$': {'click': generation_click}}, 'Generation');
 	const page =
 		E('main', {'class': 'main'},
 			E('div', {'class': 'tag'},
-				logout_tag, key_tag, list_tag, data_tag, E('span')),
+				logout_tag, key_tag, list_tag, data_tag, generation_tag, E('span')),
 			container);
 	function activate(tag, tab) {
 		if (state.changing)
@@ -413,6 +459,10 @@ function main_page() {
 	function data_click(event) {
 		event.preventDefault();
 		return activate(data_tag, data_section(page, null));
+	}
+	function generation_click(event) {
+		event.preventDefault();
+		return activate(generation_tag, generation_section());
 	}
 	activate(logout_tag, logout_section(page));
 	return page;
