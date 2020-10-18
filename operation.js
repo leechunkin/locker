@@ -17,7 +17,9 @@ authorize.statement =
 
 async function parent(owner, directory) {
 	const results = await parent.statement.query(owner, directory);
-	return results[0]['parent'];
+	if (results.length < 1)
+		return ['NONEXISTENT'];
+	return [null, results[0]['parent']];
 }
 parent.statement =
 	database.prepareStatement('SELECT parent FROM directory WHERE owner=? AND id=?');
@@ -25,7 +27,7 @@ parent.statement =
 async function list(owner, directory) {
 	const directories = await list.directories_statement.query(owner, directory);
 	const files = await list.files_statement.query(owner, directory);
-	return {directories, files};
+	return [null, {directories, files}];
 }
 list.directories_statement =
 	database.prepareStatement('SELECT id,name FROM directory WHERE id<>0 AND owner=? AND parent=? ORDER BY name ASC');
@@ -35,10 +37,10 @@ list.files_statement =
 async function erase(owner, directory, name) {
 	try {
 		await erase.statement.execute(owner, directory, name);
-		return true;
+		return [null];
 	} catch (error) {
 		console.log('operation erase error:', error);
-		return false;
+		return ['DATABASE', error];
 	}
 }
 erase.statement =
@@ -47,12 +49,15 @@ erase.statement =
 async function read(owner, directory, name) {
 	try {
 		const results = await read.statement.query(owner, directory, name);
-		if (results.length <= 0)
-			return false;
-		return results[0];
+		if (results.length === 1)
+			return [null, results[0]];
+		else if (results.length <= 0)
+			return ['NONEXISTENT'];
+		else
+			return ['SUPERFLUOUS', result.length];
 	} catch (error) {
 		console.log('operation read error: %o', error);
-		return false;
+		return ['DATABASE', error];
 	}
 }
 read.statement =
@@ -61,10 +66,10 @@ read.statement =
 async function create(owner, directory, name, nonce, content) {
 	try {
 		await create.statement.execute(owner, directory, name, nonce, content);
-		return true;
+		return [null];
 	} catch (error) {
 		console.log('operation create error:', error);
-		return false;
+		return ['DATABASE', error];
 	}
 }
 create.statement =
@@ -73,10 +78,10 @@ create.statement =
 async function change(owner, directory, origin, name, nonce, content) {
 	try {
 		await change.statement.execute(name, nonce, content, owner, directory, origin);
-		return true;
+		return [null];
 	} catch (error) {
 		console.log('operation change error:', error);
-		return false;
+		return ['DATABASE', error];
 	}
 }
 change.statement =

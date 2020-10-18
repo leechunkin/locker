@@ -11,8 +11,7 @@ Object.assign(
 	State.prototype,
 	{
 		reset() {
-			this.username = null;
-			this.password = null;
+			this.identify = null;
 			this.directory = 0;
 			this.key = {
 				text: '',
@@ -95,11 +94,10 @@ function login_page() {
 		const username_input = inputs.item(0);
 		const password_input = inputs.item(1);
 		const parent = page.parentNode;
-		const username = username_input.value;
-		const password = password_input.value;
-		if (await API.login(username, password)) {
-			state.username = username;
-			state.password = password;
+		const identify = {username: username_input.value, password: password_input.value};
+		const login = await API.login(identify);
+		if (Array.isArray(login) && login[0] === null) {
+			state.identify = identify;
 			if (parent != null) {
 				parent.insertBefore(main_page(), page)
 				return parent.removeChild(page);
@@ -114,9 +112,9 @@ function login_page() {
 	return page;
 }
 
-function main_error(main) {
+function main_error(main, reason) {
 	state.reset();
-	alert('Error!');
+	alert('Error! ' + String(reason));
 	const parent = main.parentNode;
 	parent.insertBefore(login_page(), main)
 	return parent.removeChild(main);
@@ -126,7 +124,7 @@ function logout_section(main) {
 	const section =
 		E('section', {'class': 'logout'},
 			E('form', {'event$': {'submit': submit}},
-				'Confirm ', E('button', {'type': 'submit'}, 'Log-out'), ' ', T(state.username)));
+				'Confirm ', E('button', {'type': 'submit'}, 'Log-out'), ' ', T(state.identify.username)));
 	function submit(event) {
 		event.preventDefault();
 		state.reset();
@@ -197,12 +195,12 @@ function list_section(main, open_file) {
 	var directories = [];
 	var files = [];
 	async function load() {
-		const result = await API.list(state.username, state.password, state.directory);
-		if (result === null)
-			return main_error(main);
+		const list = await API.list(state.identify, state.directory);
+		if (list[0] !== null)
+			return main_error(main, list);
 		output.textContent = null;
-		directories = result.directories;
-		files = result.files;
+		directories = list[1].directories;
+		files = list[1].files;
 		if (state.directory !== 0)
 			output.appendChild(
 				E('button', {'type': 'button', 'event$': {'click': parent_click}},
@@ -225,8 +223,8 @@ function list_section(main, open_file) {
 			for (const file of files)
 				container.appendChild(
 					E('li', null,
-						E('button', {'type': 'button', 'event$': {'click': delete_click(file.name)}},
-							'delete'),
+						E('button', {'type': 'button', 'event$': {'click': erase_click(file.name)}},
+							'erase'),
 						E('button', {'type': 'button', 'event$': {'click': edit_click(file.name)}},
 							'edit'),
 						' ',
@@ -241,10 +239,10 @@ function list_section(main, open_file) {
 	}
 	async function parent_click(event) {
 		event.preventDefault();
-		const parent = await API.parent(state.username, state.password, state.directory);
-		if (parent === null)
-			return main_error(main);
-		state.directory = parent;
+		const parent = await API.parent(state.identify, state.directory);
+		if (parent[0] !== null)
+			return main_error(main, parent);
+		state.directory = parent[1];
 		return load();
 	}
 	function directory_click(directory) {
@@ -254,11 +252,13 @@ function list_section(main, open_file) {
 			return load();
 		};
 	}
-	function delete_click(file) {
+	function erase_click(file) {
 		return async function click(event) {
 			event.preventDefault();
-			if (confirm('Delete file "' + file + '" ?')) {
-				await API.erase(state.username, state.password, state.directory, file);
+			if (confirm('Erase file "' + file + '" ?')) {
+				const erase = await API.erase(state.identify, state.directory, file);
+				if (erase[0] !== null)
+					return main_error(main, erase);
 				return load();
 			}
 		};
@@ -296,11 +296,11 @@ function data_section(main, origin) {
 		} else {
 			if (state.key.crypto === null)
 				return alert('Encryption key is not set properly.');
-			const data = await API.read(state.username, state.password, state.directory, origin);
-			if (data === false)
+			const read = await API.read(state.identify, state.directory, origin);
+			if (read[0] !== null)
 				return main_error(main);
-			const iv = base16.decode(data.nonce);
-			const chiper_code = base16.decode(data.content);
+			const iv = base16.decode(read[1].nonce);
+			const chiper_code = base16.decode(read[1].content);
 			try {
 				const clear_code = await crypto.subtle.decrypt({name: "AES-GCM", iv}, state.key.crypto, chiper_code);
 				const clear_text = (new TextDecoder).decode(clear_code);
@@ -353,8 +353,9 @@ function data_section(main, origin) {
 		const cipher_code = await crypto.subtle.encrypt({name: "AES-GCM", iv}, state.key.crypto, clear_code);
 		const cipher_text = base16.encode(cipher_code);
 		if (origin === null) {
-			if (!await API.create(state.username, state.password, state.directory, name, nonce, cipher_text))
-				return alert('Fail to create new content');
+			const create = await API.create(state.identify, state.directory, name, nonce, cipher_text);
+			if (create[0] !== null)
+				return alert('Fail to create new content: ' + String(create));
 			const parent = origin_field.parentNode;
 			const old_field = origin_field;
 			origin = name;
@@ -362,8 +363,9 @@ function data_section(main, origin) {
 			parent.insertBefore(origin_field, old_field);
 			parent.removeChild(old_field);
 		} else {
-			if (!await API.change(state.username, state.password, state.directory, origin, name, nonce, cipher_text))
-				return alert('Fail to change data');
+			const change = await API.change(state.identify, state.directory, origin, name, nonce, cipher_text);
+			if (change[0] !== null)
+				return alert('Fail to change data: ' + String(change));
 		}
 		state.changing = false;
 	}

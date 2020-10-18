@@ -4,32 +4,32 @@ MODULE.define(
 	[         'electron'],
 	function ({ipcRenderer: IPC}) {
 
-async function login(username, password) {
-	return IPC.invoke('API', {action: 'login', username, password});
+async function login(identify) {
+	return IPC.invoke('API', {action: 'login', identify});
 }
 
-async function parent(username, password, directory) {
-	return IPC.invoke('API', {action: 'parent', username, password, directory});
+async function parent(identify, directory) {
+	return IPC.invoke('API', {action: 'parent', identify, directory});
 }
 
-async function list(username, password, directory) {
-	return IPC.invoke('API', {action: 'list', username, password, directory});
+async function list(identify, directory) {
+	return IPC.invoke('API', {action: 'list', identify, directory});
 }
 
-async function erase(username, password, directory, name) {
-	return IPC.invoke('API', {action: 'erase', username, password, directory, name});
+async function erase(identify, directory, name) {
+	return IPC.invoke('API', {action: 'erase', identify, directory, name});
 }
 
-async function read(username, password, directory, name) {
-	return IPC.invoke('API', {action: 'read', username, password, directory, name});
+async function read(identify, directory, name) {
+	return IPC.invoke('API', {action: 'read', identify, directory, name});
 }
 
-async function create(username, password, directory, name, nonce, content) {
-	return IPC.invoke('API', {action: 'create', username, password, directory, name, nonce, content});
+async function create(identify, directory, name, nonce, content) {
+	return IPC.invoke('API', {action: 'create', identify, directory, name, nonce, content});
 }
 
-async function change(username, password, directory, origin, name, nonce, content) {
-	return IPC.invoke('API', {action: 'change', username, password, directory, origin, name, nonce, content});
+async function change(identify, directory, origin, name, nonce, content) {
+	return IPC.invoke('API', {action: 'change', identify, directory, origin, name, nonce, content});
 }
 
 return {login, parent, list, erase, read, create, change};

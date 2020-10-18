@@ -1,16 +1,14 @@
 'use strict';
 
 globalThis.MODULE = require('./common/module.js');
-
-MODULE.define('electron', [], function (electron) {
-	return require('electron');
-});
-
+const path = require('path');
+const electron = require('electron');
 require('./operation.js');
 require('./electron/API.js');
 
-const electron = require('electron');
-const path = require('path');
+MODULE.define('electron', [], function () {
+	return electron;
+});
 
 electron.app.whenReady().then(
 	function () {
