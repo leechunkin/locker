@@ -82,10 +82,10 @@ function login_page() {
 			E('form', {'event$': {'submit': submit}},
 				E('label', null,
 					'Username ',
-					E('input', {'type': 'text'})),
+					E('input', {'type': 'text', 'required': ''})),
 				E('label', null,
 					'Password ',
-					E('input', {'type': 'password'})),
+					E('input', {'type': 'password', 'required': ''})),
 				E('button', {'type': 'submit'},
 					'Log-in')));
 	async function submit(event) {
