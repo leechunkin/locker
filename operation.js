@@ -15,15 +15,6 @@ async function authorize(username, password) {
 authorize.statement =
 	database.prepareStatement('SELECT password FROM account WHERE name=?');
 
-async function parent(owner, directory) {
-	const results = await parent.statement.query(owner, directory);
-	if (results.length < 1)
-		return ['NONEXISTENT'];
-	return [null, results[0]['parent']];
-}
-parent.statement =
-	database.prepareStatement('SELECT parent FROM directory WHERE owner=? AND id=?');
-
 async function list(owner, directory) {
 	const directories = await list.directories_statement.query(owner, directory);
 	const files = await list.files_statement.query(owner, directory);
@@ -33,6 +24,15 @@ list.directories_statement =
 	database.prepareStatement('SELECT id,name FROM directory WHERE id<>0 AND owner=? AND parent=? ORDER BY name ASC');
 list.files_statement =
 	database.prepareStatement('SELECT name FROM data WHERE owner=? AND directory=? ORDER BY name ASC');
+
+async function parent(owner, directory) {
+	const results = await parent.statement.query(owner, directory);
+	if (results.length < 1)
+		return ['NONEXISTENT'];
+	return [null, results[0]['parent']];
+}
+parent.statement =
+	database.prepareStatement('SELECT parent FROM directory WHERE owner=? AND id=?');
 
 async function erase(owner, directory, name) {
 	try {
@@ -87,6 +87,6 @@ async function change(owner, directory, origin, name, nonce, content) {
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, parent, list, erase, read, create, change};
+return {authorize, list, parent, erase, read, create, change};
 
 });

@@ -8,12 +8,12 @@ async function login(identify) {
 	return IPC.invoke('API', {action: 'login', identify});
 }
 
-async function parent(identify, directory) {
-	return IPC.invoke('API', {action: 'parent', identify, directory});
-}
-
 async function list(identify, directory) {
 	return IPC.invoke('API', {action: 'list', identify, directory});
+}
+
+async function parent(identify, directory) {
+	return IPC.invoke('API', {action: 'parent', identify, directory});
 }
 
 async function erase(identify, directory, name) {
@@ -32,6 +32,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return IPC.invoke('API', {action: 'change', identify, directory, origin, name, nonce, content});
 }
 
-return {login, parent, list, erase, read, create, change};
+return {login, list, parent, erase, read, create, change};
 
 });

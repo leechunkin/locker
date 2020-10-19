@@ -9,11 +9,11 @@ const handle = {
 	async login() {
 		return [null];
 	},
-	async parent({identify: {username}, directory}) {
-		return operation.parent(username, directory);
-	},
 	async list({identify: {username}, directory}) {
 		return operation.list(username, directory);
+	},
+	async parent({identify: {username}, directory}) {
+		return operation.parent(username, directory);
 	},
 	async erase({identify: {username}, directory, name}) {
 		return operation.erase(username, directory, name);
