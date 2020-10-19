@@ -33,7 +33,7 @@ IPC.handle(
 	'API',
 	async function (event, request) {
 		if (request.identify == null || !await operation.authorize(request.identify.username, request.identify.password))
-			return ['unauthorized'];
+			return ['UNAUTHORIZED'];
 		const action = handle[request.action];
 		if (typeof action !== 'function')
 			return console.error('Unknown request action: "%o"', request.action);

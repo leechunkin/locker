@@ -16,7 +16,10 @@ return function (document) {
 	}
 
 	function E(tagname, attributes, ...children) {
-		const element = document.createElementNS(document.documentElement.namespaceURI, tagname);
+		const element =
+			document.documentElement !== null
+				? document.createElementNS(document.documentElement.namespaceURI, tagname)
+				: document.createElement(tagname);
 		if (typeof attributes !== 'undefined')
 			for (const attribute in attributes)
 				switch (attribute) {

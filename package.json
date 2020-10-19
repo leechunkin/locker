@@ -12,6 +12,7 @@
 		"electron": "electron electron.js"
 	},
 	"dependencies": {
+		"xmldom": "^0.3.0",
 		"database-js": "^3.0.10",
 		"database-js-postgres": "^1.1.2",
 		"electron": "^10.1.3"

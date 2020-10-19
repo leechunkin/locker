@@ -298,7 +298,7 @@ function data_section(main, origin) {
 				return alert('Encryption key is not set properly.');
 			const read = await API.read(state.identify, state.directory, origin);
 			if (read[0] !== null)
-				return main_error(main);
+				return main_error(main, read[0]);
 			const iv = base16.decode(read[1].nonce);
 			const chiper_code = base16.decode(read[1].content);
 			try {
