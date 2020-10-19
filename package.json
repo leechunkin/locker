@@ -9,6 +9,7 @@
 	},
 	"scripts": {
 		"build": "electron-rebuild",
+		"start": "node web.js",
 		"electron": "electron electron.js"
 	},
 	"dependencies": {
