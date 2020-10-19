@@ -69,7 +69,7 @@ function incorrect_password_page() {
 		event.preventDefault();
 		const parent = page.parentNode;
 		if (parent != null) {
-			parent.insertBefore(login_page(), page)
+			parent.insertBefore(login_page(), page);
 			return parent.removeChild(page);
 		}
 	}
@@ -99,12 +99,12 @@ function login_page() {
 		if (Array.isArray(login) && login[0] === null) {
 			state.identify = identify;
 			if (parent != null) {
-				parent.insertBefore(main_page(), page)
+				parent.insertBefore(main_page(), page);
 				return parent.removeChild(page);
 			}
 		} else {
 			if (parent != null) {
-				parent.insertBefore(incorrect_password_page(), page)
+				parent.insertBefore(incorrect_password_page(), page);
 				return parent.removeChild(page);
 			}
 		}
@@ -116,7 +116,7 @@ function main_error(main, reason) {
 	state.reset();
 	alert('Error! ' + String(reason));
 	const parent = main.parentNode;
-	parent.insertBefore(login_page(), main)
+	parent.insertBefore(login_page(), main);
 	return parent.removeChild(main);
 }
 
@@ -130,7 +130,7 @@ function logout_section(main) {
 		state.reset();
 		const parent = main.parentNode;
 		if (parent !== null) {
-			parent.insertBefore(login_page(), main)
+			parent.insertBefore(login_page(), main);
 			return parent.removeChild(main);
 		}
 	}
