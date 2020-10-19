@@ -58,12 +58,3 @@ return function (document) {
 };
 
 });
-
-
-MODULE.define('DOM global',
-	[        'DOM', 'document'],
-	function (DOM,   document) {
-
-return DOM(document);
-
-});
