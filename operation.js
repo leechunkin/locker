@@ -4,7 +4,7 @@ MODULE.define('operation', [], function () {
 const database_js = require('database-js');
 const process = require('process');
 
-const URL = process.env['DATABASE_URL'] || 'postgres:///localhost/locker';
+const URL = process.env['DATABASE_URL'] || 'sqlite:///locker.sqlite';
 
 const database = new (database_js.Connection)(URL);
 

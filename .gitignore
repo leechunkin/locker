@@ -1,4 +1,5 @@
 certificate.pem
 key.pem
 node_modules
+*.sqlite
 *.swp
