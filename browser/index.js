@@ -356,17 +356,17 @@ function data_section(main, origin) {
 			const create = await API.create(state.identify, state.directory, name, nonce, cipher_text);
 			if (create[0] !== null)
 				return alert('Fail to create new content: ' + String(create));
-			const parent = origin_field.parentNode;
-			const old_field = origin_field;
-			origin = name;
-			make_origin_field();
-			parent.insertBefore(origin_field, old_field);
-			parent.removeChild(old_field);
 		} else {
 			const change = await API.change(state.identify, state.directory, origin, name, nonce, cipher_text);
 			if (change[0] !== null)
 				return alert('Fail to change data: ' + String(change));
 		}
+		const parent = origin_field.parentNode;
+		const old_field = origin_field;
+		origin = name;
+		make_origin_field();
+		parent.insertBefore(origin_field, old_field);
+		parent.removeChild(old_field);
 		state.changing = false;
 	}
 	load_origin();
