@@ -14,6 +14,12 @@ Database drivers have to be installed manually, or local version of
 See: https://www.npmjs.com/package/database-js#drivers
 
 
+SETUP DATABASE
+==============
+
+Run sql/setup.sql
+
+
 TLS CERTIFICATE
 ===============
 
