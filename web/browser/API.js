@@ -64,24 +64,34 @@ async function list(identify, directory) {
 	return XHR_ok(
 		request,
 		async response => {
-			const directory_element_list = response.querySelectorAll('OK:root > directories:first-of-type > directory');
-			const file_element_list = response.querySelectorAll('OK:root > files:first-of-type > file');
+			const directories_element = common.get_element(response.documentElement, 'directories');
+			if (directories_element === null)
+				return format_error;
 			const directories = new Array;
-			for (const directory_element of directory_element_list.values()) {
-				const id = common.get_int(common.get_element(directory_element, 'id'));
-				if (id === null)
-					return format_error;
-				const name = common.get_text(common.get_element(directory_element, 'name'));
-				if (name === null)
-					return format_error;
-				directories.push({id, name});
+			for (let index=0; index<directories_element.childNodes.length; ++index) {
+				const directory_element = directories_element.childNodes.item(index);
+				if (directory_element.nodeType === directory_element.ELEMENT_NODE && directory_element.tagName === 'directory') {
+					const id = common.get_int(common.get_element(directory_element, 'id'));
+					if (id === null)
+						return format_error;
+					const name = common.get_text(common.get_element(directory_element, 'name'));
+					if (name === null)
+						return format_error;
+					directories.push({id, name});
+				}
 			}
+			const files_element = common.get_element(response.documentElement, 'files');
+			if (files_element === null)
+				return format_error;
 			const files = new Array;
-			for (const file_element of file_element_list.values()) {
-				const name = common.get_text(common.get_element(file_element, 'name'));
-				if (name === null)
-					return format_error;
-				files.push({name});
+			for (let index=0; index<files_element.childNodes.length; ++index) {
+				const file_element = files_element.childNodes.item(index);
+				if (file_element.nodeType === file_element.ELEMENT_NODE && file_element.tagName === 'file') {
+					const name = common.get_text(common.get_element(file_element, 'name'));
+					if (name === null)
+						return format_error;
+					files.push({name});
+				}
 			}
 			return [null, {directories, files}];
 		}
