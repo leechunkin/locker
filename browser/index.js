@@ -122,12 +122,21 @@ function main_error(main, reason) {
 	return parent.removeChild(main);
 }
 
-function logout_section(main) {
+function account_section(main) {
+	const password_input = E('input', null);
 	const section =
-		E('section', {'class': 'logout'},
-			E('form', {'event$': {'submit': submit}},
-				'Confirm ', E('button', {'type': 'submit'}, 'Log-out'), ' ', T(state.identify.username)));
-	function submit(event) {
+		E('section', {'class': 'account'},
+			E('form', {'event$': {'submit': logout_submit}},
+				'User ',
+				E('strong', null, T(state.identify.username)),
+				' ',
+				E('button', {'type': 'submit'}, 'Log-out')),
+			E('form', {'event$': {'submit': passwd_submit}},
+				'Change password ',
+				password_input,
+				' ',
+				E('button', {'type': 'submit'}, 'Submit')));
+	function logout_submit(event) {
 		event.preventDefault();
 		state.reset();
 		const parent = main.parentNode;
@@ -135,6 +144,15 @@ function logout_section(main) {
 			parent.insertBefore(login_page(), main);
 			return parent.removeChild(main);
 		}
+	}
+	async function passwd_submit(event) {
+		event.preventDefault();
+		const password = password_input.value;
+		const passwd = await API.passwd(state.identify, password);
+		if (passwd[0] !== null)
+			return alert('Fail to change change password: ' + String(passwd));
+		state.identify.password = password;
+		password_input.value = '';
 	}
 	return section;
 }
@@ -422,7 +440,7 @@ function generation_section() {
 function main_page() {
 	var active = null;
 	const container = E('div', {'class': 'tab'});
-	const logout_tag = E('a', {'class': 'inactive', 'event$': {'click': logout_click}}, 'Log-out');
+	const account_tag = E('a', {'class': 'inactive', 'event$': {'click': account_click}}, 'Log-out');
 	const key_tag = E('a', {'class': 'inactive', 'event$': {'click': key_click}}, 'Key');
 	const list_tag = E('a', {'class': 'inactive', 'event$': {'click': list_click}}, 'List');
 	const data_tag = E('a', {'class': 'inactive', 'event$': {'click': data_click}}, 'File');
@@ -430,7 +448,7 @@ function main_page() {
 	const page =
 		E('main', {'class': 'main'},
 			E('div', {'class': 'tag'},
-				logout_tag, key_tag, list_tag, data_tag, generation_tag, E('span')),
+				account_tag, key_tag, list_tag, data_tag, generation_tag, E('span')),
 			container);
 	function activate(tag, tab) {
 		if (state.changing)
@@ -445,9 +463,9 @@ function main_page() {
 		tag.setAttribute('class', 'active');
 		return container.appendChild(tab);
 	}
-	function logout_click(event) {
+	function account_click(event) {
 		event.preventDefault();
-		return activate(logout_tag, logout_section(page));
+		return activate(account_tag, account_section(page));
 	}
 	function key_click(event) {
 		event.preventDefault();
@@ -468,7 +486,7 @@ function main_page() {
 		event.preventDefault();
 		return activate(generation_tag, generation_section());
 	}
-	activate(logout_tag, logout_section(page));
+	activate(account_tag, account_section(page));
 	return page;
 }
 

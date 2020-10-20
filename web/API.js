@@ -17,6 +17,15 @@ const handle = {
 	async login(response, username, input) {
 		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
 	},
+	async passwd(response, username, input) {
+		const password = common.get_int(common.get_element(input.documentElement, 'password'));
+		if (password === null)
+			return respond_empty(response, 400);
+		const result = await operation.passwd(username, password);
+		if (result[0] !== null)
+			return respond_XML(response, input.implementation.createDocument(null, result[0]));
+		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+	},
 	async list(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
 		if (directory === null)

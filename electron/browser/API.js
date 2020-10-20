@@ -8,6 +8,10 @@ async function login(identify) {
 	return IPC.invoke('API', {action: 'login', identify});
 }
 
+async function passwd(identify, password) {
+	return IPC.invoke('API', {action: 'passwd', identify, password});
+}
+
 async function list(identify, directory) {
 	return IPC.invoke('API', {action: 'list', identify, directory});
 }
@@ -32,6 +36,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return IPC.invoke('API', {action: 'change', identify, directory, origin, name, nonce, content});
 }
 
-return {login, list, parent, erase, read, create, change};
+return {login, passwd, list, parent, erase, read, create, change};
 
 });

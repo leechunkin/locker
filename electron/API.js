@@ -9,6 +9,9 @@ const handle = {
 	async login() {
 		return [null];
 	},
+	async passwd({identify: {username}, password}) {
+		return operation.passwd(username, password);
+	},
 	async list({identify: {username}, directory}) {
 		return operation.list(username, directory);
 	},

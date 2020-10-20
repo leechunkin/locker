@@ -55,6 +55,15 @@ async function login(identify) {
 	return XHR_ok(create_request('login', identify), async response => [null]);
 }
 
+async function passwd(identify, password) {
+	const request = create_request('passwd', identify);
+	const {T, E} = DOM(request);
+	request.documentElement.appendChild(
+		E('password', null, T(password))
+	);
+	return XHR_ok(request, async response => [null]);
+}
+
 async function list(identify, directory) {
 	const request = create_request('list', identify);
 	const {T, E} = DOM(request);
@@ -161,6 +170,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return XHR_ok(request, async response => [null]);
 }
 
-return {login, list, parent, erase, read, create, change};
+return {login, passwd, list, parent, erase, read, create, change};
 
 });

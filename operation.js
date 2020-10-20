@@ -15,6 +15,17 @@ async function authorize(username, password) {
 authorize.statement =
 	database.prepareStatement('SELECT password FROM account WHERE name=?');
 
+async function passwd(username, password) {
+	return passwd.statement.execute(password, username).then(
+		() => [null],
+		error => {
+			console.log('operation passwd error:', error);
+			return ['DATABASE', error];
+		}
+	);
+}
+passwd.statement = database.prepareStatement('UPDATE account SET password=? WHERE name=?');
+
 async function list(owner, directory) {
 	const directories = await list.directories_statement.query(owner, directory);
 	const files = await list.files_statement.query(owner, directory);
@@ -47,46 +58,48 @@ erase.statement =
 	database.prepareStatement('DELETE FROM data WHERE owner=? AND directory=? AND name=?');
 
 async function read(owner, directory, name) {
-	try {
-		const results = await read.statement.query(owner, directory, name);
-		if (results.length === 1)
-			return [null, results[0]];
-		else if (results.length <= 0)
-			return ['NONEXISTENT'];
-		else
-			return ['SUPERFLUOUS', result.length];
-	} catch (error) {
-		console.log('operation read error: %o', error);
-		return ['DATABASE', error];
-	}
+	return read.statement.query(owner, directory, name).then(
+		results => {
+			if (results.length === 1)
+				return [null, results[0]];
+			else if (results.length <= 0)
+				return ['NONEXISTENT'];
+			else
+				return ['SUPERFLUOUS', result.length];
+		},
+		error => {
+			console.log('operation read error: %o', error);
+			return ['DATABASE', error];
+		}
+	);
 }
 read.statement =
 	database.prepareStatement('SELECT nonce,content FROM data WHERE owner=? AND directory=? AND name=?');
 
 async function create(owner, directory, name, nonce, content) {
-	try {
-		await create.statement.execute(owner, directory, name, nonce, content);
-		return [null];
-	} catch (error) {
-		console.log('operation create error:', error);
-		return ['DATABASE', error];
-	}
+	return create.statement.execute(owner, directory, name, nonce, content).then(
+		() => [null],
+		error => {
+			console.log('operation create error:', error);
+			return ['DATABASE', error];
+		}
+	);
 }
 create.statement =
 	database.prepareStatement('INSERT INTO data (owner, directory, name, nonce, content) VALUES (?,?,?,?,?)');
 
 async function change(owner, directory, origin, name, nonce, content) {
-	try {
-		await change.statement.execute(name, nonce, content, owner, directory, origin);
-		return [null];
-	} catch (error) {
-		console.log('operation change error:', error);
-		return ['DATABASE', error];
-	}
+	return change.statement.execute(name, nonce, content, owner, directory, origin).then(
+		() => [null],
+		error => {
+			console.log('operation change error:', error);
+			return ['DATABASE', error];
+		}
+	);
 }
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, list, parent, erase, read, create, change};
+return {authorize, passwd, list, parent, erase, read, create, change};
 
 });
