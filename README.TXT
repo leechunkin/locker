@@ -33,8 +33,14 @@ Otherwise, HTTP and HTTP/1 are used.
 EXECUTE
 =======
 
+To start Electron App:
+npm run-script electron
+
 To start web server:
 npm run-script start
 
-To start Electron App:
-npm run-script electron
+If it will not be run as web server,
+dependent "xmldoc" in "package.json" can be removed.
+
+If it will not be run as App,
+dependent "electron" can be removed.
