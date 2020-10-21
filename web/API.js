@@ -18,7 +18,7 @@ const handle = {
 		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
 	},
 	async passwd(response, username, input) {
-		const password = common.get_int(common.get_element(input.documentElement, 'password'));
+		const password = common.get_text(common.get_element(input.documentElement, 'password'));
 		if (password === null)
 			return respond_empty(response, 400);
 		const result = await operation.passwd(username, password);
