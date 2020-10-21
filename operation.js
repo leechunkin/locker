@@ -32,6 +32,7 @@ authorize.statement =
 	database.prepareStatement('SELECT password FROM account WHERE name=?');
 
 async function passwd(username, password) {
+	if (password.length <= 0) return ['CONTENT'];
 	return argon2.hash(password).then(
 		hash =>
 			passwd.statement.execute(hash, username).then(

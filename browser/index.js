@@ -123,7 +123,7 @@ function main_error(main, reason) {
 }
 
 function account_section(main) {
-	const password_input = E('input', null);
+	const password_input = E('input', {'required': ''});
 	const section =
 		E('section', {'class': 'account'},
 			'Current user ',
