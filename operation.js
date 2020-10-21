@@ -1,8 +1,9 @@
 'use strict';
 MODULE.define('operation', [], function () {
 
-const database_js = require('database-js');
 const process = require('process');
+const database_js = require('database-js');
+const argon2 = require('argon2');
 
 const URL = process.env['DATABASE_URL'] || 'sqlite:///locker.sqlite';
 
@@ -10,17 +11,39 @@ const database = new (database_js.Connection)(URL);
 
 async function authorize(username, password) {
 	const results = await authorize.statement.query(username);
-	return results.findIndex(result => result['password'] == password) >= 0;
+	if (results.length <= 0) return false;
+	const stored = results[0]['password'];
+	if (stored.startsWith('$0$')) {
+		return '$0$' + password === stored;
+	} else if (stored.startsWith('$argon2i$')) {
+		return argon2.verify(stored, password).then(
+			result => result,
+			error => {
+				console.error('authorize argon2 error:', error);
+				return false
+			}
+		);
+	} else {
+		console.error('authorize unknown password hash: %s', stored);
+		return false
+	}
 }
 authorize.statement =
 	database.prepareStatement('SELECT password FROM account WHERE name=?');
 
 async function passwd(username, password) {
-	return passwd.statement.execute(password, username).then(
-		() => [null],
+	return await argon2.hash(password).then(
+		hash =>
+			passwd.statement.execute(hash, username).then(
+				() => [null],
+				error => {
+					console.log('operation passwd database error:', error);
+					return ['DATABASE', error];
+				}
+			),
 		error => {
-			console.log('operation passwd error:', error);
-			return ['DATABASE', error];
+			console.log('operation passwd hash error:', error);
+			return ['HASH', error];
 		}
 	);
 }

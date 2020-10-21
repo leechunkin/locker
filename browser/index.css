@@ -57,6 +57,7 @@ section.data > form > div {
 
 section.data > form > div > label > textarea {
 	display: block;
+	width: 100%;
 }
 
 section.data-wrong-key > span {
