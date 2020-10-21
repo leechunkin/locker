@@ -313,7 +313,7 @@ function data_section(main, origin) {
 	if (state.key.crypto === null)
 		return E('section', {'class': 'data-empty-key'}, 'Encryption key is not set properly.');
 	const section = E('section', {'class': 'data'}, 'Loading...');
-	const name_input = E('input', {'type': 'text', 'event$': {'change': name_change}});
+	const name_input = E('input', {'type': 'text', 'required': '', 'event$': {'change': name_change}});
 	const content_input = E('textarea', {'event$': {'change': content_change}});
 	function make_origin_field() {
 		origin_input =
