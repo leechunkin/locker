@@ -64,6 +64,10 @@ async function passwd(identify, password) {
 	return XHR_ok(request, async response => [null]);
 }
 
+async function userdel(identify) {
+	return XHR_ok(create_request('userdel', identify), async response => [null]);
+}
+
 async function list(identify, directory) {
 	const request = create_request('list', identify);
 	const {T, E} = DOM(request);
@@ -170,6 +174,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return XHR_ok(request, async response => [null]);
 }
 
-return {login, passwd, list, parent, erase, read, create, change};
+return {login, passwd, userdel, list, parent, erase, read, create, change};
 
 });

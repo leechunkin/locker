@@ -12,6 +12,9 @@ const handle = {
 	async passwd({identify: {username}, password}) {
 		return operation.passwd(username, password);
 	},
+	async userdel({identify: {username}}) {
+		return operation.userdel(username);
+	},
 	async list({identify: {username}, directory}) {
 		return operation.list(username, directory);
 	},

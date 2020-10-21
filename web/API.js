@@ -26,6 +26,12 @@ const handle = {
 			return respond_XML(response, input.implementation.createDocument(null, result[0]));
 		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
 	},
+	async userdel(response, username, input) {
+		const result = await operation.userdel(username);
+		if (result[0] !== null)
+			return respond_XML(response, input.implementation.createDocument(null, result[0]));
+		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+	},
 	async list(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
 		if (directory === null)

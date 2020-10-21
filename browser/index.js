@@ -126,24 +126,29 @@ function account_section(main) {
 	const password_input = E('input', null);
 	const section =
 		E('section', {'class': 'account'},
+			'Current user ',
+			E('strong', null, T(state.identify.username)),
 			E('form', {'event$': {'submit': logout_submit}},
-				'User ',
-				E('strong', null, T(state.identify.username)),
-				' ',
-				E('button', {'type': 'submit'}, 'Log-out')),
+				E('button', {'type': 'submit'}, 'Log-out'),
+				' this session'),
 			E('form', {'event$': {'submit': passwd_submit}},
-				'Change password ',
-				password_input,
-				' ',
-				E('button', {'type': 'submit'}, 'Submit')));
-	function logout_submit(event) {
-		event.preventDefault();
+				E('button', {'type': 'submit'}, 'Change'),
+				' password to ',
+				password_input),
+			E('form', {'event$': {'submit': userdel_submit}},
+				E('button', {'type': 'submit'}, 'Delete'),
+				' this account'));
+	function logout() {
 		state.reset();
 		const parent = main.parentNode;
 		if (parent !== null) {
 			parent.insertBefore(login_page(), main);
 			return parent.removeChild(main);
 		}
+	}
+	function logout_submit(event) {
+		event.preventDefault();
+		return logout();
 	}
 	async function passwd_submit(event) {
 		event.preventDefault();
@@ -153,6 +158,15 @@ function account_section(main) {
 			return alert('Fail to change change password: ' + String(passwd));
 		state.identify.password = password;
 		password_input.value = '';
+	}
+	async function userdel_submit(event) {
+		event.preventDefault();
+		if (confirm('Delete account "' + state.identify.username + '"')) {
+			const result = await API.userdel(state.identify);
+			if (result[0] !== null)
+				return main_error(result, list);
+			return logout();
+		}
 	}
 	return section;
 }
@@ -440,7 +454,7 @@ function generation_section() {
 function main_page() {
 	var active = null;
 	const container = E('div', {'class': 'tab'});
-	const account_tag = E('a', {'class': 'inactive', 'event$': {'click': account_click}}, 'Log-out');
+	const account_tag = E('a', {'class': 'inactive', 'event$': {'click': account_click}}, 'Account');
 	const key_tag = E('a', {'class': 'inactive', 'event$': {'click': key_click}}, 'Key');
 	const list_tag = E('a', {'class': 'inactive', 'event$': {'click': list_click}}, 'List');
 	const data_tag = E('a', {'class': 'inactive', 'event$': {'click': data_click}}, 'File');

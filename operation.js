@@ -32,7 +32,7 @@ authorize.statement =
 	database.prepareStatement('SELECT password FROM account WHERE name=?');
 
 async function passwd(username, password) {
-	return await argon2.hash(password).then(
+	return argon2.hash(password).then(
 		hash =>
 			passwd.statement.execute(hash, username).then(
 				() => [null],
@@ -49,10 +49,26 @@ async function passwd(username, password) {
 }
 passwd.statement = database.prepareStatement('UPDATE account SET password=? WHERE name=?');
 
+async function userdel(username) {
+	try {
+		await userdel.statement.execute(username);
+		return [null];
+	} catch (error) {
+		console.log('operation userdel error:', error);
+		return ['DATABASE', error];
+	}
+}
+userdel.statement = database.prepareStatement('DELETE FROM account WHERE name=?');
+
 async function list(owner, directory) {
-	const directories = await list.directories_statement.query(owner, directory);
-	const files = await list.files_statement.query(owner, directory);
-	return [null, {directories, files}];
+	try {
+		const directories = await list.directories_statement.query(owner, directory);
+		const files = await list.files_statement.query(owner, directory);
+		return [null, {directories, files}];
+	} catch (error) {
+		console.log('operation list error:', error);
+		return ['DATABASE', error];
+	}
 }
 list.directories_statement =
 	database.prepareStatement('SELECT id,name FROM directory WHERE id<>0 AND owner=? AND parent=? ORDER BY name ASC');
@@ -123,6 +139,6 @@ async function change(owner, directory, origin, name, nonce, content) {
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, passwd, list, parent, erase, read, create, change};
+return {authorize, passwd, userdel, list, parent, erase, read, create, change};
 
 });
