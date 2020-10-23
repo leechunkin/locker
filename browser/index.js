@@ -246,15 +246,10 @@ function list_section(main, open_file) {
 	const mkdir_input = E('input', {'type': 'text'});
 	const section =
 		E('section', {'class': 'list'},
-			E('div', null,
-				E('button', {'type': 'button', 'event$': {'click': refresh_click}}, 'Refresh')),
-			E('div', null,
-				E('label', null,
-					'Create directory ',
-					mkdir_input,
-					' ',
-					E('button', {'type': 'button', 'event$': {'click': mkdir_click}},
-						'Create'))),
+			E('form', {'event$': {'submit': refresh_submit}},
+				E('button', {'type': 'submit'}, 'Refresh')),
+			E('form', {'event$': {'submit': mkdir_submit}},
+				E('label', null, 'Create directory ', mkdir_input, ' ', E('button', {'type': 'submit'}, 'Create'))),
 			output);
 	var directories = [];
 	var files = [];
@@ -297,11 +292,11 @@ function list_section(main, open_file) {
 			return output.appendChild(container);
 		}();
 	}
-	async function refresh_click() {
+	async function refresh_submit() {
 		event.preventDefault();
 		return load();
 	}
-	async function mkdir_click(event) {
+	async function mkdir_submit(event) {
 		event.preventDefault();
 		const result = await API.mkdir(state.identify, state.directory, mkdir_input.value);
 		if (!Array.isArray(result) || result[0] !== null)

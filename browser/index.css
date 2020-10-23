@@ -53,6 +53,10 @@ section.key > form > div {
 	margin: 0.5ex 0;
 }
 
+section.list > form {
+	margin: 0.5ex 0;
+}
+
 section.list > div {
 	margin: 0.5ex 0;
 }
