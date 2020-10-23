@@ -48,7 +48,8 @@ async function passwd(username, password) {
 		}
 	);
 }
-passwd.statement = database.prepareStatement('UPDATE account SET password=? WHERE name=?');
+passwd.statement =
+	database.prepareStatement('UPDATE account SET password=? WHERE name=?');
 
 async function userdel(username) {
 	return userdel.data_statement.execute(username).then(
@@ -73,9 +74,12 @@ async function userdel(username) {
 		}
 	);
 }
-userdel.data_statement = database.prepareStatement('DELETE FROM data WHERE owner=?');
-userdel.directory_statement = database.prepareStatement('DELETE FROM directory WHERE owner=?');
-userdel.account_statement = database.prepareStatement('DELETE FROM account WHERE name=?');
+userdel.data_statement =
+	database.prepareStatement('DELETE FROM data WHERE owner=?');
+userdel.directory_statement =
+	database.prepareStatement('DELETE FROM directory WHERE owner=?');
+userdel.account_statement =
+	database.prepareStatement('DELETE FROM account WHERE name=?');
 
 async function useradd(username, password) {
 	if (username.length <= 0) return ['CONTENT', 'username'];
@@ -102,8 +106,10 @@ async function useradd(username, password) {
 		}
 	);
 }
-useradd.account_statement = database.prepareStatement('INSERT INTO account (name, password) VALUES (?,?)');
-useradd.directory_statement = database.prepareStatement('INSERT INTO directory (owner, id, name, parent) VALUES (?,0,\'\',0)');
+useradd.account_statement =
+	database.prepareStatement('INSERT INTO account (name, password) VALUES (?,?)');
+useradd.directory_statement =
+	database.prepareStatement('INSERT INTO directory (owner, id, name, parent) VALUES (?,0,\'\',0)');
 
 async function list(owner, directory) {
 	try {
@@ -128,6 +134,21 @@ async function parent(owner, directory) {
 }
 parent.statement =
 	database.prepareStatement('SELECT parent FROM directory WHERE owner=? AND id=?');
+
+async function mkdir(owner, directory, name) {
+	return mkdir.statement.execute(owner, name, directory).then(
+		() => [null],
+		error => {
+			console.log('operation mkdir error:', error);
+			return ['DATABASE', error];
+		}
+	);
+}
+mkdir.statement =
+	database.prepareStatement(
+		'WITH w(owner, id) AS (SELECT owner, max(id)+1 FROM directory WHERE owner=?)'
+			+ ' INSERT INTO directory (owner, id, name, parent) SELECT owner, id, ?, ? FROM w;'
+	);
 
 async function erase(owner, directory, name) {
 	try {
@@ -184,6 +205,6 @@ async function change(owner, directory, origin, name, nonce, content) {
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, passwd, userdel, useradd, list, parent, erase, read, create, change};
+return {authorize, passwd, userdel, useradd, list, parent, mkdir, erase, read, create, change};
 
 });

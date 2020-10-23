@@ -138,6 +138,14 @@ async function parent(identify, directory) {
 	);
 }
 
+async function mkdir(identify, directory, name) {
+	const request = create_request('mkdir', identify);
+	const {T, E} = DOM(request);
+	request.documentElement.appendChild(E('directory', null, T(directory)));
+	request.documentElement.appendChild(E('name', null, T(name)));
+	return XHR_ok(request, async response => [null]);
+}
+
 async function erase(identify, directory, name) {
 	const request = create_request('erase', identify);
 	const {T, E} = DOM(request);
@@ -186,6 +194,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return XHR_ok(request, async response => [null]);
 }
 
-return {login, passwd, userdel, useradd, list, parent, erase, read, create, change};
+return {login, passwd, userdel, useradd, list, parent, mkdir, erase, read, create, change};
 
 });

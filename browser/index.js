@@ -243,9 +243,18 @@ function key_section() {
 
 function list_section(main, open_file) {
 	const output = E('div', null, 'Loading...');
+	const mkdir_input = E('input', {'type': 'text'});
 	const section =
 		E('section', {'class': 'list'},
-			E('button', {'type': 'button', 'event$': {'click': refresh_click}}, 'Refresh'),
+			E('div', null,
+				E('button', {'type': 'button', 'event$': {'click': refresh_click}}, 'Refresh')),
+			E('div', null,
+				E('label', null,
+					'Create directory ',
+					mkdir_input,
+					' ',
+					E('button', {'type': 'button', 'event$': {'click': mkdir_click}},
+						'Create'))),
 			output);
 	var directories = [];
 	var files = [];
@@ -290,6 +299,14 @@ function list_section(main, open_file) {
 	}
 	async function refresh_click() {
 		event.preventDefault();
+		return load();
+	}
+	async function mkdir_click(event) {
+		event.preventDefault();
+		const result = await API.mkdir(state.identify, state.directory, mkdir_input.value);
+		if (!Array.isArray(result) || result[0] !== null)
+			return alert('Fail to create directory: ' + String(result));
+		mkdir_input.value = '';
 		return load();
 	}
 	async function parent_click(event) {

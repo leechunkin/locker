@@ -24,6 +24,9 @@ const handle = {
 	async parent({identify: {username}, directory}) {
 		return operation.parent(username, directory);
 	},
+	async mkdir({identify: {username}, directory, name}) {
+		return operation.mkdir(username, directory, name);
+	},
 	async erase({identify: {username}, directory, name}) {
 		return operation.erase(username, directory, name);
 	},
