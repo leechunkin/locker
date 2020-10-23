@@ -127,18 +127,24 @@ function account_section(main) {
 	const password_input = E('input', {'required': ''});
 	const section =
 		E('section', {'class': 'account'},
-			'Current user ',
-			E('strong', null, T(state.identify.username)),
-			E('form', {'event$': {'submit': logout_submit}},
-				E('button', {'type': 'submit'}, 'Log-out'),
-				' this session'),
-			E('form', {'event$': {'submit': passwd_submit}},
-				E('button', {'type': 'submit'}, 'Change'),
-				' password to ',
-				password_input),
-			E('form', {'event$': {'submit': userdel_submit}},
-				E('button', {'type': 'submit'}, 'Delete'),
-				' this account'));
+			E('ul', null,
+				E('li', null,
+					'Current user: ',
+					E('strong', null, T(state.identify.username))),
+				E('li', null,
+					E('form', {'event$': {'submit': logout_submit}},
+						'Log-out this session ',
+						E('button', {'type': 'submit'}, 'Log-out'))),
+				E('li', null,
+					E('form', {'event$': {'submit': passwd_submit}},
+						'Change password to ',
+						password_input,
+						' ',
+						E('button', {'type': 'submit'}, 'Change'))),
+				E('li', null,
+					E('form', {'event$': {'submit': userdel_submit}},
+						'Delete this account ',
+						E('button', {'type': 'submit'}, 'Delete')))));
 	function logout() {
 		state.reset();
 		const parent = main.parentNode;
