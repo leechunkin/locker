@@ -51,15 +51,31 @@ async function passwd(username, password) {
 passwd.statement = database.prepareStatement('UPDATE account SET password=? WHERE name=?');
 
 async function userdel(username) {
-	try {
-		await userdel.statement.execute(username);
-		return [null];
-	} catch (error) {
-		console.log('operation userdel error:', error);
-		return ['DATABASE', error];
-	}
+	return userdel.data_statement.execute(username).then(
+		() =>
+			userdel.directory_statement.execute(username).then(
+				() =>
+					userdel.account_statement.execute(username).then(
+						() => [null],
+						error => {
+							console.log('operation userdel account error:', error);
+							return ['DATABASE', error];
+						}
+					),
+				error => {
+					console.log('operation userdel directory error:', error);
+					return ['DATABASE', error];
+				}
+			),
+		error => {
+			console.log('operation userdel data error:', error);
+			return ['DATABASE', error];
+		}
+	);
 }
-userdel.statement = database.prepareStatement('DELETE FROM account WHERE name=?');
+userdel.data_statement = database.prepareStatement('DELETE FROM data WHERE owner=?');
+userdel.directory_statement = database.prepareStatement('DELETE FROM directory WHERE owner=?');
+userdel.account_statement = database.prepareStatement('DELETE FROM account WHERE name=?');
 
 async function useradd(username, password) {
 	if (username.length <= 0) return ['CONTENT', 'username'];
