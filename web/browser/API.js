@@ -68,6 +68,18 @@ async function userdel(identify) {
 	return XHR_ok(create_request('userdel', identify), async response => [null]);
 }
 
+async function useradd(identify, username, password) {
+	const request = create_request('useradd', identify);
+	const {T, E} = DOM(request);
+	request.documentElement.appendChild(
+		E('username', null, T(username))
+	);
+	request.documentElement.appendChild(
+		E('password', null, T(password))
+	);
+	return XHR_ok(request, async response => [null]);
+}
+
 async function list(identify, directory) {
 	const request = create_request('list', identify);
 	const {T, E} = DOM(request);
@@ -174,6 +186,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return XHR_ok(request, async response => [null]);
 }
 
-return {login, passwd, userdel, list, parent, erase, read, create, change};
+return {login, passwd, userdel, useradd, list, parent, erase, read, create, change};
 
 });

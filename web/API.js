@@ -32,6 +32,14 @@ const handle = {
 			return respond_XML(response, input.implementation.createDocument(null, result[0]));
 		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
 	},
+	async useradd(response, username, input) {
+		const new_username = common.get_text(common.get_element(input.documentElement, 'username'));
+		const new_password = common.get_text(common.get_element(input.documentElement, 'password'));
+		const result = await operation.useradd(new_username, new_password);
+		if (result[0] !== null)
+			return respond_XML(response, input.implementation.createDocument(null, result[0]));
+		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+	},
 	async list(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
 		if (directory === null)

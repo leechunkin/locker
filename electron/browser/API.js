@@ -16,6 +16,10 @@ async function userdel(identify) {
 	return IPC.invoke('API', {action: 'userdel', identify});
 }
 
+async function useradd(identify, username, password) {
+	return IPC.invoke('API', {action: 'useradd', identify, username, password});
+}
+
 async function list(identify, directory) {
 	return IPC.invoke('API', {action: 'list', identify, directory});
 }
@@ -40,6 +44,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return IPC.invoke('API', {action: 'change', identify, directory, origin, name, nonce, content});
 }
 
-return {login, passwd, userdel, list, parent, erase, read, create, change};
+return {login, passwd, userdel, useradd, list, parent, erase, read, create, change};
 
 });

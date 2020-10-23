@@ -124,7 +124,9 @@ function main_error(main, reason) {
 }
 
 function account_section(main) {
-	const password_input = E('input', {'required': ''});
+	const passwd_password_input = E('input', {'type': 'text', 'required': '', 'placeholder': 'new password'});
+	const useradd_username_input = E('input', {'type': 'text', 'required': '', 'placeholder': 'username'});
+	const useradd_password_input = E('input', {'type': 'text', 'required': '', 'placeholder': 'password'});
 	const section =
 		E('section', {'class': 'account'},
 			E('ul', null,
@@ -138,13 +140,21 @@ function account_section(main) {
 				E('li', null,
 					E('form', {'event$': {'submit': passwd_submit}},
 						'Change password to ',
-						password_input,
+						passwd_password_input,
 						' ',
 						E('button', {'type': 'submit'}, 'Change'))),
 				E('li', null,
 					E('form', {'event$': {'submit': userdel_submit}},
 						'Delete this account ',
-						E('button', {'type': 'submit'}, 'Delete')))));
+						E('button', {'type': 'submit'}, 'Delete'))),
+				E('li', null,
+					E('form', {'event$': {'submit': useradd_submit}},
+						'Create new account ',
+						useradd_username_input,
+						' password ',
+						useradd_password_input,
+						' ',
+						E('button', {'type': 'submit'}, 'Create')))));
 	function logout() {
 		state.reset();
 		const parent = main.parentNode;
@@ -159,21 +169,31 @@ function account_section(main) {
 	}
 	async function passwd_submit(event) {
 		event.preventDefault();
-		const password = password_input.value;
+		const password = passwd_password_input.value;
 		const result = await API.passwd(state.identify, password);
 		if (!Array.isArray(result) || result[0] !== null)
 			return alert('Fail to change change password: ' + String(result));
 		state.identify.password = password;
-		password_input.value = '';
+		passwd_password_input.value = '';
 	}
 	async function userdel_submit(event) {
 		event.preventDefault();
 		if (confirm('Delete account "' + state.identify.username + '"')) {
 			const result = await API.userdel(state.identify);
 			if (!Array.isArray(result) || result[0] !== null)
-				return main_error(result, list);
+				return alert('Fail to change delete account: ' + String(result));
 			return logout();
 		}
+	}
+	async function useradd_submit(event) {
+		event.preventDefault();
+		const username = useradd_username_input.value;
+		const password = useradd_password_input.value;
+		const result = await API.useradd(state.identify, username, password);
+		if (!Array.isArray(result) || result[0] !== null)
+			return alert('Fail to change create account: ' + String(result));
+		useradd_username_input.value = '';
+		useradd_password_input.value = '';
 	}
 	return section;
 }
@@ -320,7 +340,7 @@ function data_section(main, origin) {
 		return E('section', {'class': 'data-empty-key'}, 'Encryption key is not set properly.');
 	const section = E('section', {'class': 'data'}, 'Loading...');
 	const name_input = E('input', {'type': 'text', 'required': '', 'event$': {'change': name_change}});
-	const content_input = E('textarea', {'event$': {'change': content_change}});
+	const content_input = E('textarea', {'rows': '24', 'event$': {'change': content_change}});
 	function make_origin_field() {
 		origin_input =
 			E('input', {'type': 'text', 'disabled': '', 'value': origin});

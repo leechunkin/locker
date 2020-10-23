@@ -32,7 +32,7 @@ authorize.statement =
 	database.prepareStatement('SELECT password FROM account WHERE name=?');
 
 async function passwd(username, password) {
-	if (password.length <= 0) return ['CONTENT'];
+	if (password.length <= 0) return ['CONTENT', 'password'];
 	return argon2.hash(password).then(
 		hash =>
 			passwd.statement.execute(hash, username).then(
@@ -60,6 +60,26 @@ async function userdel(username) {
 	}
 }
 userdel.statement = database.prepareStatement('DELETE FROM account WHERE name=?');
+
+async function useradd(username, password) {
+	if (username.length <= 0) return ['CONTENT', 'username'];
+	if (password.length <= 0) return ['CONTENT', 'password'];
+	return argon2.hash(password).then(
+		hash =>
+			useradd.statement.execute(username, hash).then(
+				() => [null],
+				error => {
+					console.log('operation useradd database error:', error);
+					return ['DATABASE', error];
+				}
+			),
+		error => {
+			console.log('operation useradd hash error:', error);
+			return ['HASH', error];
+		}
+	);
+}
+useradd.statement = database.prepareStatement('INSERT INTO account (name, password) VALUES (?, ?)');
 
 async function list(owner, directory) {
 	try {
@@ -140,6 +160,6 @@ async function change(owner, directory, origin, name, nonce, content) {
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, passwd, userdel, list, parent, erase, read, create, change};
+return {authorize, passwd, userdel, useradd, list, parent, erase, read, create, change};
 
 });
