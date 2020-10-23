@@ -65,7 +65,7 @@ function incorrect_password_page() {
 	const page =
 		E('main', {'class': 'incorrect_password'},
 			'Incorrect login password!',
-			E('a', {'class': 'link', 'event$': {'click': click}},
+			E('a', {'href': '#', 'event$': {'click': click}},
 				'Back to login page'));
 	function click(event) {
 		event.preventDefault();

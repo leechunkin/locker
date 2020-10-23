@@ -89,12 +89,6 @@ section.generation > form > div > label > output.ready {
 	color: darkblue;
 }
 
-a.link {
-	color: blue;
-	text-decoration: underline;
-	cursor: pointer;
-}
-
 button {
 	cursor: pointer;
 }
