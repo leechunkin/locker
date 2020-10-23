@@ -44,6 +44,8 @@ main.main > div.tab {
 
 section.account > form {
 	margin: 2ex 0;
+	border: black thin solid;
+	padding: 2ex 1ex;
 }
 
 section.key > form > div {
