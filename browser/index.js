@@ -193,7 +193,7 @@ function account_section(main) {
 }
 
 function key_section() {
-	const text_input = E('input', {'type': 'text', 'value': state.key.text, 'event$': {'change': text_change}});
+	const text_input = E('input', {'type': 'password', 'value': state.key.text, 'event$': {'change': text_change}});
 	const file_input = E('input', {'type': 'file', 'event$': {'change': file_change}});
 	const section =
 		E('section' , {'class': 'key'},
