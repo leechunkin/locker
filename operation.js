@@ -66,10 +66,17 @@ async function useradd(username, password) {
 	if (password.length <= 0) return ['CONTENT', 'password'];
 	return argon2.hash(password).then(
 		hash =>
-			useradd.statement.execute(username, hash).then(
-				() => [null],
+			useradd.account_statement.execute(username, hash).then(
+				() =>
+					useradd.directory_statement.execute(username).then(
+						() => [null],
+						error => {
+							console.log('operation useradd database directory error:', error);
+							return ['DATABASE', error];
+						}
+					),
 				error => {
-					console.log('operation useradd database error:', error);
+					console.log('operation useradd database account error:', error);
 					return ['DATABASE', error];
 				}
 			),
@@ -79,7 +86,8 @@ async function useradd(username, password) {
 		}
 	);
 }
-useradd.statement = database.prepareStatement('INSERT INTO account (name, password) VALUES (?, ?)');
+useradd.account_statement = database.prepareStatement('INSERT INTO account (name, password) VALUES (?,?)');
+useradd.directory_statement = database.prepareStatement('INSERT INTO directory (owner, id, name, parent) VALUES (?,0,\'\',0)');
 
 async function list(owner, directory) {
 	try {
