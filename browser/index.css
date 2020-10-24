@@ -57,7 +57,7 @@ section.list > form {
 	margin: 0.5ex 0;
 }
 
-section.list > div {
+section.list > div > form {
 	margin: 0.5ex 0;
 }
 

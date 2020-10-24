@@ -32,6 +32,10 @@ async function mkdir(identify, directory, name) {
 	return IPC.invoke('API', {action: 'mkdir', identify, directory, name});
 }
 
+async function rmdir(identify, directory) {
+	return IPC.invoke('API', {action: 'rmdir', identify, directory});
+}
+
 async function erase(identify, directory, name) {
 	return IPC.invoke('API', {action: 'erase', identify, directory, name});
 }
@@ -48,6 +52,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return IPC.invoke('API', {action: 'change', identify, directory, origin, name, nonce, content});
 }
 
-return {login, passwd, userdel, useradd, list, parent, mkdir, erase, read, create, change};
+return {login, passwd, userdel, useradd, list, parent, mkdir, rmdir, erase, read, create, change};
 
 });

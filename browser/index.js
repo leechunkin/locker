@@ -260,11 +260,17 @@ function list_section(main, open_file) {
 		output.textContent = null;
 		directories = result[1].directories;
 		files = result[1].files;
-		if (state.directory !== 0)
+		if (state.directory !== 0) {
 			output.appendChild(
-				E('button', {'type': 'button', 'event$': {'click': parent_click}},
-					'upper directory')
+				E('form', {'event$': {'submit': rmdir_submit}},
+					E('button', {'type': 'submit'}, 'Remove'),
+					' this directory and all the files, and move all sub-directories to parent directory.')
 			);
+			output.appendChild(
+				E('form', {'event$': {'submit': parent_submit}},
+					E('button', {'type': 'submit'}, 'Upper directory'))
+			);
+		}
 		void function () {
 			const container = E('ul');
 			for (const directory of directories)
@@ -304,7 +310,17 @@ function list_section(main, open_file) {
 		mkdir_input.value = '';
 		return load();
 	}
-	async function parent_click(event) {
+	async function rmdir_submit(event) {
+		event.preventDefault();
+		if (confirm('Remove this directory ?')) {
+			const result = await API.rmdir(state.identify, state.directory);
+			if (!Array.isArray(result) || result[0] !== null)
+				return alert('Fail to remove directory: ' + String(result));
+			state.directory = result[1];
+			return load();
+		}
+	}
+	async function parent_submit(event) {
 		event.preventDefault();
 		const result = await API.parent(state.identify, state.directory);
 		if (!Array.isArray(result) || result[0] !== null)
@@ -325,7 +341,7 @@ function list_section(main, open_file) {
 			if (confirm('Erase file "' + file + '" ?')) {
 				const result = await API.erase(state.identify, state.directory, file);
 				if (!Array.isArray(result) || result[0] !== null)
-					return main_error(main, result);
+					return alert('Fail to erase file: ' + String(result));
 				return load();
 			}
 		};

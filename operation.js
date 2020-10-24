@@ -150,6 +150,34 @@ mkdir.statement =
 			+ ' INSERT INTO directory (owner, id, name, parent) SELECT owner, id, ?, ? FROM w;'
 	);
 
+async function rmdir(owner, directory) {
+	if (directory === 0) return ['CONTENT'];
+	try {
+		await database.beginTransaction();
+		const results = await rmdir.parent_statement.query(owner, directory);
+		if (results.length < 1)
+			return ['NONEXISTENT'];
+		const parent = results[0]['parent'];
+		await rmdir.move_statement.execute(parent, owner, directory);
+		await rmdir.data_statement.execute(owner, directory);
+		await rmdir.remove_statement.execute(owner, directory);
+		await database.commit();
+		return [null, parent];
+	} catch (error) {
+		if (database.inTransaction()) database.rollback();
+		console.log('operation rmdir error:', error);
+		return ['DATABASE', error];
+	}
+}
+rmdir.parent_statement =
+	database.prepareStatement('SELECT parent FROM directory WHERE owner=? AND id=?');
+rmdir.move_statement =
+	database.prepareStatement('UPDATE directory SET parent=? WHERE owner=? AND parent=?');
+rmdir.data_statement =
+	database.prepareStatement('DELETE FROM data WHERE owner=? AND directory=?');
+rmdir.remove_statement =
+	database.prepareStatement('DELETE FROM directory WHERE owner=? AND id=?');
+
 async function erase(owner, directory, name) {
 	try {
 		await erase.statement.execute(owner, directory, name);
@@ -205,6 +233,6 @@ async function change(owner, directory, origin, name, nonce, content) {
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, passwd, userdel, useradd, list, parent, mkdir, erase, read, create, change};
+return {authorize, passwd, userdel, useradd, list, parent, mkdir, rmdir, erase, read, create, change};
 
 });

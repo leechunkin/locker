@@ -89,6 +89,17 @@ const handle = {
 			return respond_XML(response, input.implementation.createDocument(null, result[0]));
 		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
 	},
+	async rmdir(response, username, input) {
+		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
+		if (directory === null)
+			return respond_empty(response, 400);
+		const result = await operation.rmdir(username, directory);
+		if (result[0] !== null)
+			return respond_XML(response, input.implementation.createDocument(null, result[0]));
+		const output = input.implementation.createDocument(null, 'OK');
+		output.documentElement.appendChild(output.createTextNode(result[1].toString()));
+		return respond_XML(response, output);
+	},
 	async erase(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
 		if (directory === null)
