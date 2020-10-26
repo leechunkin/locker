@@ -124,9 +124,9 @@ function main_error(main, reason) {
 }
 
 function account_section(main) {
-	const passwd_password_input = E('input', {'type': 'text', 'required': '', 'placeholder': 'new password'});
+	const passwd_password_input = E('input', {'type': 'password', 'required': '', 'placeholder': 'new password'});
 	const useradd_username_input = E('input', {'type': 'text', 'required': '', 'placeholder': 'username'});
-	const useradd_password_input = E('input', {'type': 'text', 'required': '', 'placeholder': 'password'});
+	const useradd_password_input = E('input', {'type': 'password', 'required': '', 'placeholder': 'password'});
 	const section =
 		E('section', {'class': 'account'},
 			'Current user: ',
