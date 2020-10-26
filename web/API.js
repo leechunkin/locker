@@ -6,10 +6,27 @@ MODULE.define(
 
 const {XMLSerializer} = require('xmldom');
 
+function respond_empty(response, status) {
+	response.setHeader('Content-Type', 'text/plain; charset=US-ASCII');
+	return response.writeHead(status).end();
+}
+
 function respond_XML(response, xml) {
 	const string = (new XMLSerializer).serializeToString(xml);
 	response.setHeader('Content-Type', 'text/xml');
 	return response.writeHead(200).end(string);
+}
+
+function simple_respond(response, implementation, result) {
+	return respond_XML(response, implementation.createDocument(null, result[0] === null ? 'OK' : result[0]));
+}
+
+function text_respond(response, implementation, result) {
+	if (result[0] !== null)
+		return respond_XML(response, implementation.createDocument(null, result[0]));
+	const output = implementation.createDocument(null, 'OK');
+	output.documentElement.appendChild(output.createTextNode(result[1].toString()));
+	return respond_XML(response, output);
 }
 
 const handle = {
@@ -21,24 +38,15 @@ const handle = {
 		const password = common.get_text(common.get_element(input.documentElement, 'password'));
 		if (password === null)
 			return respond_empty(response, 400);
-		const result = await operation.passwd(username, password);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, await operation.passwd(username, password));
 	},
 	async userdel(response, username, input) {
-		const result = await operation.userdel(username);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, await operation.userdel(username));
 	},
 	async useradd(response, username, input) {
 		const new_username = common.get_text(common.get_element(input.documentElement, 'username'));
 		const new_password = common.get_text(common.get_element(input.documentElement, 'password'));
-		const result = await operation.useradd(new_username, new_password);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, await operation.useradd(new_username, new_password));
 	},
 	async list(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
@@ -70,12 +78,7 @@ const handle = {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
 		if (directory === null)
 			return respond_empty(response, 400);
-		const result = await operation.parent(username, directory);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		const output = input.implementation.createDocument(null, 'OK');
-		output.documentElement.appendChild(output.createTextNode(result[1].toString()));
-		return respond_XML(response, output);
+		return text_respond(response, input.implementation, await operation.parent(username, directory));
 	},
 	async mkdir(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
@@ -84,21 +87,13 @@ const handle = {
 		const name = common.get_text(common.get_element(input.documentElement, 'name'));
 		if (name === null)
 			return respond_empty(response, 400);
-		const result = await operation.mkdir(username, directory, name);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, await operation.mkdir(username, directory, name));
 	},
 	async rmdir(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
 		if (directory === null)
 			return respond_empty(response, 400);
-		const result = await operation.rmdir(username, directory);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		const output = input.implementation.createDocument(null, 'OK');
-		output.documentElement.appendChild(output.createTextNode(result[1].toString()));
-		return respond_XML(response, output);
+		return text_respond(response, input.implementation, await operation.rmdir(username, directory));
 	},
 	async erase(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
@@ -107,10 +102,7 @@ const handle = {
 		const name = common.get_text(common.get_element(input.documentElement, 'name'));
 		if (name === null)
 			return respond_empty(response, 400);
-		const result = await operation.erase(username, directory, name);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, await operation.erase(username, directory, name));
 	},
 	async read(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
@@ -141,10 +133,7 @@ const handle = {
 		const content = common.get_text(common.get_element(input.documentElement, 'content'));
 		if (content === null)
 			return respond_empty(response, 400);
-		const result = await operation.create(username, directory, name, nonce, content);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, await operation.create(username, directory, name, nonce, content));
 	},
 	async change(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
@@ -163,16 +152,9 @@ const handle = {
 		if (content === null)
 			return respond_empty(response, 400);
 		const result = await operation.change(username, directory, origin, name, nonce, content);
-		if (result[0] !== null)
-			return respond_XML(response, input.implementation.createDocument(null, result[0]));
-		return respond_XML(response, input.implementation.createDocument(null, 'OK'));
+		return simple_respond(response, input.implementation, result);
 	}
 };
-
-function respond_empty(response, status) {
-	response.setHeader('Content-Type', 'text/plain; charset=US-ASCII');
-	return response.writeHead(status).end();
-}
 
 async function dispatch(response, xml) {
 	if (xml.documentElement === null)
