@@ -28,38 +28,62 @@ Object.assign(
 
 const state = new State;
 
-const base16 = {
+const base64 = {
+	/* RFC 4648 base64 */
 	encode(buffer) {
-		var i, x0, x1;
-		var u8a = new Uint8Array(buffer);
-		var a = new Array(u8a.length);
-		for (i = 0; i < u8a.length; ++i) {
-			x1 = this.encode.table[(u8a[i] >> 4) & 0x0F];
-			x0 = this.encode.table[u8a[i] & 0x0F];
-			a[i] = x1 + x0;
+		var input = new Uint8Array(buffer);
+		var output = new Uint8Array(Math.ceil(input.length * 4 / 3));
+		var b = 0;
+		var c = 0;
+		var j = 0;
+		for (var i=0; i<input.length; ++i) {
+			b = ((b << 8) | input[i]) & 0xFFFF;
+			c += 8;
+			while (c >= 6) {
+				c -= 6;
+				output[j] = this.encode.table[(b & (0x3F << c)) >> c];
+				++j;
+			}
 		}
-		return a.join('');
+		if (c > 0) {
+			b <<= 5;
+			c += 5;
+			while (c >= 6) {
+				c -= 6;
+				output[j] = this.encode.table[(b & (0x3F << c)) >> c];
+				++j;
+			}
+		}
+		return (new TextDecoder).decode(output);
 	},
 	decode(string) {
-		var i, x0, x1;
-		var length = string.length >> 1;
-		var bytes = new Uint8Array(length);
-		for (i = 0; i < length; ++i) {
-			x1 = this.decode.table[string[i << 1]];
-			x0 = this.decode.table[string[(i << 1) + 1]];
-			bytes[i] = (x1 << 4) | x0;
+		var bytes = new Uint8Array(Math.floor(string.length * 3 / 4));
+		var b = 0;
+		var c = 0;
+		var j = 0;
+		for (var i=0; i<string.length; ++i) {
+			b = ((b << 6) | this.decode.table[string.charCodeAt(i)]) & 0x0FFF;
+			c += 6;
+			while (c >= 8) {
+				c -= 8;
+				bytes[j] = (b & (0xFF << c)) >> c;
+				++j;
+			}
 		}
 		return bytes.buffer;
 	}
 };
-base16.encode.table = '0123456789ABCDEF';
-base16.decode.table = {
-	__proto__: null,
-	'0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
-	'5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-	'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
-	'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15
-};
+base64.encode.table =
+	function (table) {
+		var s = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+		for (var i=0; i<64; ++i) table[i] = s.charCodeAt(i);
+		return table;
+	}(Object.create(null));
+base64.decode.table =
+	function (table) {
+		for (var i=0; i<64; ++i) table[base64.encode.table[i]] = i;
+		return table;
+	}(Object.create(null));
 
 function incorrect_password_page() {
 	const page =
@@ -390,8 +414,8 @@ function data_section(main, origin) {
 			const result = await API.read(state.identify, state.directory, origin);
 			if (!Array.isArray(result) || result[0] !== null)
 				return main_error(main, result[0]);
-			const iv = base16.decode(result[1].nonce);
-			const chiper_code = base16.decode(result[1].content);
+			const iv = base64.decode(result[1].nonce);
+			const chiper_code = base64.decode(result[1].content);
 			try {
 				const clear_code = await crypto.subtle.decrypt({name: "AES-GCM", iv}, state.key.crypto, chiper_code);
 				const clear_text = (new TextDecoder).decode(clear_code);
@@ -411,7 +435,7 @@ function data_section(main, origin) {
 			E('form', {'event$': {'submit': submit}},
 				origin_field,
 				E('div', null, E('label', null, 'Title ', name_input)),
-				E('div', null, E('label', null, 'Content ', content_input)),
+				E('div', null, E('label', null, 'Content (to be encrypted)', content_input)),
 				E('div', null, E('button', {'type': 'submit'}, 'Save'))),
 			section.firstChild
 		);
@@ -439,10 +463,10 @@ function data_section(main, origin) {
 		if (state.key.crypto === null)
 			return alert('Encryption key is not set properly.');
 		const iv = crypto.getRandomValues(new Uint8Array(12));
-		const nonce = base16.encode(iv);
+		const nonce = base64.encode(iv);
 		const clear_code = (new TextEncoder).encode(content);
 		const cipher_code = await crypto.subtle.encrypt({name: "AES-GCM", iv}, state.key.crypto, clear_code);
-		const cipher_text = base16.encode(cipher_code);
+		const cipher_text = base64.encode(cipher_code);
 		if (origin === null) {
 			const result = await API.create(state.identify, state.directory, name, nonce, cipher_text);
 			if (!Array.isArray(result) || result[0] !== null)
