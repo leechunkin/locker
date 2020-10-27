@@ -517,11 +517,11 @@ function generation_section() {
 function main_page() {
 	var active = null;
 	const container = E('div', {'class': 'tab'});
-	const account_tag = E('a', {'class': 'inactive', 'event$': {'click': account_click}}, 'Account');
-	const key_tag = E('a', {'class': 'inactive', 'event$': {'click': key_click}}, 'Key');
-	const list_tag = E('a', {'class': 'inactive', 'event$': {'click': list_click}}, 'List');
-	const data_tag = E('a', {'class': 'inactive', 'event$': {'click': data_click}}, 'File');
-	const generation_tag = E('a', {'class': 'inactive', 'event$': {'click': generation_click}}, 'Generation');
+	const account_tag = E('a', {'class': 'inactive', 'href': '#', 'event$': {'click': account_click}}, 'Account');
+	const key_tag = E('a', {'class': 'inactive', 'href': '#', 'event$': {'click': key_click}}, 'Key');
+	const list_tag = E('a', {'class': 'inactive', 'href': '#', 'event$': {'click': list_click}}, 'List');
+	const data_tag = E('a', {'class': 'inactive', 'href': '#', 'event$': {'click': data_click}}, 'File');
+	const generation_tag = E('a', {'class': 'inactive', 'href': '#', 'event$': {'click': generation_click}}, 'Generation');
 	const page =
 		E('main', {'class': 'main'},
 			E('div', {'class': 'tag'},
