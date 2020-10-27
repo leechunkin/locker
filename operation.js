@@ -113,16 +113,21 @@ useradd.directory_statement =
 
 async function list(owner, directory) {
 	try {
+		const name = await list.directory_statement.query(owner, directory);
+		if (name.length < 1)
+			return ['NONEXISTENT'];
 		const directories = await list.directories_statement.query(owner, directory);
 		const files = await list.files_statement.query(owner, directory);
-		return [null, {directories, files}];
+		return [null, {name: name[0]['name'], directories, files}];
 	} catch (error) {
 		console.log('operation list error:', error);
 		return ['DATABASE', error];
 	}
 }
+list.directory_statement =
+	database.prepareStatement('SELECT name FROM directory WHERE owner=? AND id=?');
 list.directories_statement =
-	database.prepareStatement('SELECT id,name FROM directory WHERE id<>0 AND owner=? AND parent=? ORDER BY name ASC');
+	database.prepareStatement('SELECT id,name FROM directory WHERE owner=? AND parent=? AND id<>parent ORDER BY name ASC');
 list.files_statement =
 	database.prepareStatement('SELECT name FROM data WHERE owner=? AND directory=? ORDER BY name ASC');
 
@@ -149,6 +154,18 @@ mkdir.statement =
 		'WITH w(owner, id) AS (SELECT owner, max(id)+1 FROM directory WHERE owner=?)'
 			+ ' INSERT INTO directory (owner, id, name, parent) SELECT owner, id, ?, ? FROM w;'
 	);
+
+async function rename_dir(owner, directory, name) {
+	return rename_dir.statement.execute(name, owner, directory).then(
+		() => [null],
+		error => {
+			console.log('operation rename_dir error:', error);
+			return ['DATABASE', error];
+		}
+	);
+}
+rename_dir.statement =
+	database.prepareStatement('UPDATE directory SET name=? WHERE owner=? AND id=?');
 
 async function rmdir(owner, directory) {
 	if (directory === 0) return ['CONTENT'];
@@ -233,6 +250,6 @@ async function change(owner, directory, origin, name, nonce, content) {
 change.statement =
 	database.prepareStatement('UPDATE data SET name=?, nonce=?, content=? WHERE owner=? AND directory=? AND name=?');
 
-return {authorize, passwd, userdel, useradd, list, parent, mkdir, rmdir, erase, read, create, change};
+return {authorize, passwd, userdel, useradd, list, parent, mkdir, rename_dir, rmdir, erase, read, create, change};
 
 });

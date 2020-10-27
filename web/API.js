@@ -58,6 +58,8 @@ const handle = {
 		const output = input.implementation.createDocument(null, 'OK');
 		const {T, E} = DOM(output);
 		output.documentElement.appendChild(
+			E('name', null, T(result[1].name)));
+		output.documentElement.appendChild(
 			E('directories', null,
 				result[1].directories.map(
 					directory =>
@@ -88,6 +90,15 @@ const handle = {
 		if (name === null)
 			return respond_empty(response, 400);
 		return simple_respond(response, input.implementation, await operation.mkdir(username, directory, name));
+	},
+	async rename_dir(response, username, input) {
+		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));
+		if (directory === null)
+			return respond_empty(response, 400);
+		const name = common.get_text(common.get_element(input.documentElement, 'name'));
+		if (name === null)
+			return respond_empty(response, 400);
+		return simple_respond(response, input.implementation, await operation.rename_dir(username, directory, name));
 	},
 	async rmdir(response, username, input) {
 		const directory = common.get_int(common.get_element(input.documentElement, 'directory'));

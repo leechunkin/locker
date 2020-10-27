@@ -89,6 +89,9 @@ async function list(identify, directory) {
 	return XHR_ok(
 		request,
 		async response => {
+			const name = common.get_text(common.get_element(response.documentElement, 'name'));
+			if (name === null)
+				return format_error;
 			const directories_element = common.get_element(response.documentElement, 'directories');
 			if (directories_element === null)
 				return format_error;
@@ -118,7 +121,7 @@ async function list(identify, directory) {
 					files.push({name});
 				}
 			}
-			return [null, {directories, files}];
+			return [null, {name, directories, files}];
 		}
 	);
 }
@@ -140,6 +143,14 @@ async function parent(identify, directory) {
 
 async function mkdir(identify, directory, name) {
 	const request = create_request('mkdir', identify);
+	const {T, E} = DOM(request);
+	request.documentElement.appendChild(E('directory', null, T(directory)));
+	request.documentElement.appendChild(E('name', null, T(name)));
+	return XHR_ok(request, async response => [null]);
+}
+
+async function rename_dir(identify, directory, name) {
+	const request = create_request('rename_dir', identify);
 	const {T, E} = DOM(request);
 	request.documentElement.appendChild(E('directory', null, T(directory)));
 	request.documentElement.appendChild(E('name', null, T(name)));
@@ -209,6 +220,6 @@ async function change(identify, directory, origin, name, nonce, content) {
 	return XHR_ok(request, async response => [null]);
 }
 
-return {login, passwd, userdel, useradd, list, parent, mkdir, rmdir, erase, read, create, change};
+return {login, passwd, userdel, useradd, list, parent, mkdir, rename_dir, rmdir, erase, read, create, change};
 
 });

@@ -27,6 +27,9 @@ const handle = {
 	async mkdir({identify: {username}, directory, name}) {
 		return operation.mkdir(username, directory, name);
 	},
+	async rename_dir({identify: {username}, directory, name}) {
+		return operation.rename_dir(username, directory, name);
+	},
 	async rmdir({identify: {username}, directory}) {
 		return operation.rmdir(username, directory);
 	},

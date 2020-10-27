@@ -242,35 +242,43 @@ function key_section() {
 }
 
 function list_section(main, open_file) {
-	const output = E('div', null, 'Loading...');
+	const rename_input = E('input', {'type': 'text'});
 	const mkdir_input = E('input', {'type': 'text'});
-	const section =
-		E('section', {'class': 'list'},
-			E('form', {'event$': {'submit': refresh_submit}},
-				E('button', {'type': 'submit'}, 'Refresh')),
-			E('form', {'event$': {'submit': mkdir_submit}},
-				E('label', null, 'Create directory ', mkdir_input, ' ', E('button', {'type': 'submit'}, 'Create'))),
-			output);
+	const section = E('section', {'class': 'list'});
 	var directories = [];
 	var files = [];
 	async function load() {
 		const result = await API.list(state.identify, state.directory);
 		if (!Array.isArray(result) || result[0] !== null)
 			return main_error(main, result);
-		output.textContent = null;
+		section.textContent = null;
 		directories = result[1].directories;
 		files = result[1].files;
 		if (state.directory !== 0) {
-			output.appendChild(
-				E('form', {'event$': {'submit': rmdir_submit}},
-					E('button', {'type': 'submit'}, 'Remove'),
-					' this directory and all the files, and move all sub-directories to parent directory.')
-			);
-			output.appendChild(
+			section.appendChild(
 				E('form', {'event$': {'submit': parent_submit}},
 					E('button', {'type': 'submit'}, 'Upper directory'))
 			);
+			rename_input.value = result[1].name;
+			section.appendChild(
+				E('form', {'event$': {'submit': rename_submit}},
+					E('label', null, 'Directory: ', rename_input),
+					E('button', {'type': 'submit'}, 'Rename')),
+			);
+			section.appendChild(
+				E('form', {'event$': {'submit': rmdir_submit}},
+					E('button', {'type': 'submit'}, 'Remove'),
+					' this directory and all files in this directory. Sub-directories will be moved to the parent directory.')
+			);
 		}
+		section.appendChild(
+			E('form', {'event$': {'submit': mkdir_submit}},
+				E('label', null, 'Create directory ', mkdir_input, ' ', E('button', {'type': 'submit'}, 'Create')))
+		);
+		section.appendChild(
+			E('form', {'event$': {'submit': refresh_submit}},
+				E('button', {'type': 'submit'}, 'Refresh')),
+		);
 		void function () {
 			const container = E('ul');
 			for (const directory of directories)
@@ -281,7 +289,7 @@ function list_section(main, open_file) {
 						' ',
 						T(directory.name))
 				);
-			return output.appendChild(container);
+			return section.appendChild(container);
 		}();
 		void function () {
 			const container = E('ol');
@@ -295,20 +303,22 @@ function list_section(main, open_file) {
 						' ',
 						T(file.name))
 				);
-			return output.appendChild(container);
+			return section.appendChild(container);
 		}();
 	}
-	async function refresh_submit() {
+	async function parent_submit(event) {
 		event.preventDefault();
+		const result = await API.parent(state.identify, state.directory);
+		if (!Array.isArray(result) || result[0] !== null)
+			return main_error(main, result);
+		state.directory = result[1];
 		return load();
 	}
-	async function mkdir_submit(event) {
+	async function rename_submit() {
 		event.preventDefault();
-		const result = await API.mkdir(state.identify, state.directory, mkdir_input.value);
+		const result = await API.rename_dir(state.identify, state.directory, rename_input.value);
 		if (!Array.isArray(result) || result[0] !== null)
-			return alert('Fail to create directory: ' + String(result));
-		mkdir_input.value = '';
-		return load();
+			return alert('Fail to rename directory: ' + String(result));
 	}
 	async function rmdir_submit(event) {
 		event.preventDefault();
@@ -320,12 +330,16 @@ function list_section(main, open_file) {
 			return load();
 		}
 	}
-	async function parent_submit(event) {
+	async function mkdir_submit(event) {
 		event.preventDefault();
-		const result = await API.parent(state.identify, state.directory);
+		const result = await API.mkdir(state.identify, state.directory, mkdir_input.value);
 		if (!Array.isArray(result) || result[0] !== null)
-			return main_error(main, result);
-		state.directory = result[1];
+			return alert('Fail to create directory: ' + String(result));
+		mkdir_input.value = '';
+		return load();
+	}
+	async function refresh_submit() {
+		event.preventDefault();
 		return load();
 	}
 	function directory_click(directory) {
