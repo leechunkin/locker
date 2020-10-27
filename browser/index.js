@@ -254,30 +254,24 @@ function list_section(main, open_file) {
 		section.textContent = null;
 		directories = result[1].directories;
 		files = result[1].files;
+		const toolbar = E('div', null, E('button', {'type': 'button', 'event$': {'click': refresh_click}}, 'Refresh'));
+		section.appendChild(toolbar);
 		if (state.directory !== 0) {
-			section.appendChild(
-				E('form', {'event$': {'submit': parent_submit}},
-					E('button', {'type': 'submit'}, 'Upper directory'))
-			);
+			toolbar.appendChild(E('button', {'type': 'button', 'event$': {'click': parent_click}}, 'Upper'));
+			toolbar.appendChild(E('button', {'type': 'button', 'event$': {'click': rmdir_click}}, 'Remove'));
 			rename_input.value = result[1].name;
 			section.appendChild(
-				E('form', {'event$': {'submit': rename_submit}},
-					E('label', null, 'Directory: ', rename_input),
-					E('button', {'type': 'submit'}, 'Rename')),
-			);
-			section.appendChild(
-				E('form', {'event$': {'submit': rmdir_submit}},
-					E('button', {'type': 'submit'}, 'Remove'),
-					' this directory and all files in this directory. Sub-directories will be moved to the parent directory.')
+				E('div', null,
+					E('form', {'event$': {'submit': rename_submit}},
+						E('label', null, 'Directory: ', rename_input),
+						' ',
+						E('button', {'type': 'submit'}, 'Rename')))
 			);
 		}
 		section.appendChild(
-			E('form', {'event$': {'submit': mkdir_submit}},
-				E('label', null, 'Create directory ', mkdir_input, ' ', E('button', {'type': 'submit'}, 'Create')))
-		);
-		section.appendChild(
-			E('form', {'event$': {'submit': refresh_submit}},
-				E('button', {'type': 'submit'}, 'Refresh')),
+			E('div', null,
+				E('form', {'event$': {'submit': mkdir_submit}},
+					E('label', null, 'Create directory ', mkdir_input, ' ', E('button', {'type': 'submit'}, 'Create'))))
 		);
 		void function () {
 			const container = E('ul');
@@ -306,7 +300,11 @@ function list_section(main, open_file) {
 			return section.appendChild(container);
 		}();
 	}
-	async function parent_submit(event) {
+	async function refresh_click() {
+		event.preventDefault();
+		return load();
+	}
+	async function parent_click(event) {
 		event.preventDefault();
 		const result = await API.parent(state.identify, state.directory);
 		if (!Array.isArray(result) || result[0] !== null)
@@ -314,15 +312,9 @@ function list_section(main, open_file) {
 		state.directory = result[1];
 		return load();
 	}
-	async function rename_submit() {
+	async function rmdir_click(event) {
 		event.preventDefault();
-		const result = await API.rename_dir(state.identify, state.directory, rename_input.value);
-		if (!Array.isArray(result) || result[0] !== null)
-			return alert('Fail to rename directory: ' + String(result));
-	}
-	async function rmdir_submit(event) {
-		event.preventDefault();
-		if (confirm('Remove this directory ?')) {
+		if (confirm('Remove this directory and all contained files ?\nSub-directories will be moved to parent directory.')) {
 			const result = await API.rmdir(state.identify, state.directory);
 			if (!Array.isArray(result) || result[0] !== null)
 				return alert('Fail to remove directory: ' + String(result));
@@ -330,16 +322,18 @@ function list_section(main, open_file) {
 			return load();
 		}
 	}
+	async function rename_submit() {
+		event.preventDefault();
+		const result = await API.rename_dir(state.identify, state.directory, rename_input.value);
+		if (!Array.isArray(result) || result[0] !== null)
+			return alert('Fail to rename directory: ' + String(result));
+	}
 	async function mkdir_submit(event) {
 		event.preventDefault();
 		const result = await API.mkdir(state.identify, state.directory, mkdir_input.value);
 		if (!Array.isArray(result) || result[0] !== null)
 			return alert('Fail to create directory: ' + String(result));
 		mkdir_input.value = '';
-		return load();
-	}
-	async function refresh_submit() {
-		event.preventDefault();
 		return load();
 	}
 	function directory_click(directory) {
