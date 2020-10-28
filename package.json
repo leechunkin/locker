@@ -8,7 +8,6 @@
 		"npm": "^6.14.4"
 	},
 	"scripts": {
-		"build": "electron-rebuild",
 		"start": "node web.js",
 		"electron": "electron electron.js"
 	},
