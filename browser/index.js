@@ -41,7 +41,7 @@ const base64 = {
 			c += 8;
 			while (c >= 6) {
 				c -= 6;
-				output[j] = this.encode.table[(b & (0x3F << c)) >> c];
+				output[j] = this.encode.table[(b >> c) & 0x3F];
 				++j;
 			}
 		}
@@ -50,7 +50,7 @@ const base64 = {
 			c += 5;
 			while (c >= 6) {
 				c -= 6;
-				output[j] = this.encode.table[(b & (0x3F << c)) >> c];
+				output[j] = this.encode.table[(b >> c) & 0x3F];
 				++j;
 			}
 		}
@@ -66,7 +66,7 @@ const base64 = {
 			c += 6;
 			while (c >= 8) {
 				c -= 8;
-				bytes[j] = (b & (0xFF << c)) >> c;
+				bytes[j] = (b >> c) & 0xFF;
 				++j;
 			}
 		}
