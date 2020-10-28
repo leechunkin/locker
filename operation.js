@@ -151,7 +151,7 @@ async function mkdir(owner, directory, name) {
 }
 mkdir.statement =
 	database.prepareStatement(
-		'WITH w(owner, id) AS (SELECT owner, max(id)+1 FROM directory WHERE owner=?)'
+		'WITH w(owner, id) AS (SELECT owner, max(id)+1 FROM directory WHERE owner=? GROUP BY owner)'
 			+ ' INSERT INTO directory (owner, id, name, parent) SELECT owner, id, ?, ? FROM w;'
 	);
 
