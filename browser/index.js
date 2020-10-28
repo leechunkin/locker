@@ -78,12 +78,12 @@ base64.encode.table =
 		var s = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 		for (var i=0; i<64; ++i) table[i] = s.charCodeAt(i);
 		return table;
-	}(Object.create(null));
+	}(new Array(64));
 base64.decode.table =
 	function (table) {
 		for (var i=0; i<64; ++i) table[base64.encode.table[i]] = i;
 		return table;
-	}(Object.create(null));
+	}(new Array(128));
 
 function incorrect_password_page() {
 	const page =
