@@ -278,7 +278,9 @@ function list_section(main, open_file) {
 		section.textContent = null;
 		directories = result[1].directories;
 		files = result[1].files;
-		const toolbar = E('div', null, E('button', {'type': 'button', 'event$': {'click': refresh_click}}, 'Refresh'));
+		const toolbar =
+			E('div', null,
+				E('button', {'type': 'button', 'event$': {'click': refresh_click}}, 'Refresh'));
 		section.appendChild(toolbar);
 		if (state.directory !== 0) {
 			toolbar.appendChild(E('button', {'type': 'button', 'event$': {'click': parent_click}}, 'Upper'));
@@ -287,7 +289,7 @@ function list_section(main, open_file) {
 			section.appendChild(
 				E('div', null,
 					E('form', {'event$': {'submit': rename_submit}},
-						E('label', null, 'Directory: ', rename_input),
+						E('label', null, 'Directory ', rename_input),
 						' ',
 						E('button', {'type': 'submit'}, 'Rename')))
 			);
