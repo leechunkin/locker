@@ -419,7 +419,7 @@ function data_section(main, origin) {
 			const iv = base64.decode(result[1].nonce);
 			const chiper_code = base64.decode(result[1].content);
 			try {
-				const clear_code = await crypto.subtle.decrypt({name: "AES-GCM", iv}, state.key.crypto, chiper_code);
+				const clear_code = await crypto.subtle.decrypt({name: 'AES-GCM', iv}, state.key.crypto, chiper_code);
 				const clear_text = (new TextDecoder).decode(clear_code);
 				make_origin_field();
 				name_input.value = origin;
@@ -467,7 +467,7 @@ function data_section(main, origin) {
 		const iv = crypto.getRandomValues(new Uint8Array(12));
 		const nonce = base64.encode(iv);
 		const clear_code = (new TextEncoder).encode(content);
-		const cipher_code = await crypto.subtle.encrypt({name: "AES-GCM", iv}, state.key.crypto, clear_code);
+		const cipher_code = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, state.key.crypto, clear_code);
 		const cipher_text = base64.encode(cipher_code);
 		if (origin === null) {
 			const result = await API.create(state.identify, state.directory, name, nonce, cipher_text);
@@ -494,7 +494,7 @@ function generation_section() {
 	var limit = 56;
 	var key = ''
 	var last_x, last_y;
-	const characters = "ZN23456789ABCDEFGHJKLMPQRSTUVWXY";
+	const characters = 'YZ23456789ABCDEFGHJKLMNPQRSTUVWX';
 	const output = E('output', null);
 	const section =
 		E('section', {'class': 'generation'},
@@ -510,7 +510,7 @@ function generation_section() {
 										const b = (n * 5).toString();
 										const a = {'value': c};
 										if (n === limit) a['selected'] = '';
-										return E("option", a, c + " characters, " + b + " bits");
+										return E('option', a, c + ' characters, ' + b + ' bits');
 									}
 								)))),
 				E('div', null, E('label', null, 'Generated password: ', output))));
