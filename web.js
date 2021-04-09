@@ -89,14 +89,13 @@ function handle_GET(response, request) {
 		return respond_file(response, path.join(__dirname, 'web', 'browser', pathname));
 }
 
-function handle_XML(response, request, body) {
+async function handle_XML(response, request, body) {
 	const pathname = new URL(request.url, 'http://[::1]').pathname;
 	if (pathname !== common.API_URL) {
 		response.setHeader('Content-Type', 'text/plain; charset=US-ASCII');
 		return response.writeHead(404).end();
 	}
 	const xml = (new xmldom.DOMParser).parseFromString(body.toString());
-	const action = xml.documentElement.tagName;
 	return API.dispatch(response, xml);
 }
 
@@ -104,7 +103,7 @@ function handle_POST(response, request) {
 	const data_collection = new Array;
 	request.on(
 		'end',
-		function () {
+		async function () {
 			if (data_collection === null) {
 				response.setHeader('Content-Type', 'text/plain; charset=US-ASCII');
 				return response.writeHead(500).end();
