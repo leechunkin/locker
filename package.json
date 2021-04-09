@@ -1,6 +1,6 @@
 {
 	"name": "locker",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "encrypted notepad",
 	"license": "GPL3",
 	"engines": {
