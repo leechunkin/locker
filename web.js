@@ -17,19 +17,21 @@ MODULE.define(
 const certificate_file = 'certificate.pem';
 const key_file = 'key.pem';
 
-const port = Number.parseInt(process.env['PORT']) || 80;
-
 const BODY_LENGTH_LIMIT = 1048576;
 
-const server =
-	(function () {
+var port = Number.parseInt(process.env['PORT']);
+
+const server = (
+	function () {
 		try {
 			fs.accessSync(certificate_file, fs.constants.R_OK);
 			fs.accessSync(key_file, fs.constants.R_OK);
 		} catch (error) {
+			port = port || 443;
 			console.info('HTTP on', port);
 			return require('http').createServer();
 		}
+		port = port || 80;
 		console.info('HTTPS on', port);
 		return require('http2').createSecureServer(
 			{
@@ -38,7 +40,8 @@ const server =
 				allowHTTP1: true
 			}
 		);
-	})();
+	}()
+);
 
 const type_extension = {
 	__proto__: null,
