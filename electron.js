@@ -32,6 +32,7 @@ electron.app.whenReady().then(
 					width: 800,
 					height: 600,
 					webPreferences: {
+						contextIsolation: false,
 						preload: path.join(electron.app.getAppPath(), 'electron/browser/preload.js'),
 						//	nodeIntegration: true,
 						//	devTools: false,

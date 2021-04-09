@@ -4,17 +4,17 @@
 	"description": "encrypted notepad",
 	"license": "GPL3",
 	"engines": {
-		"node": "^12.16.3",
-		"npm": "^6.14.4"
+		"node": "^14.16.1",
+		"npm": "^6.14.12"
 	},
 	"scripts": {
 		"start": "node web.js",
 		"electron": "electron electron.js"
 	},
 	"dependencies": {
-		"electron": "^10.1.5",
-		"xmldom": "^0.4.0",
+		"electron": "^12.0.2",
+		"xmldom": "^0.5.0",
 		"database-js": "^3.0.10",
-		"argon2": "^0.27.0"
+		"argon2": "^0.27.2"
 	}
 }
